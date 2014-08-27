@@ -17,18 +17,8 @@ class IndexedOrientableTest extends FlatSpec {
   import Turn._
   import Orientation._
 
-  object oTest extends Orientable[String] {
+  val oTest = Orientable( "arriba", "norte", "este", "sur", "oeste", "abajo" )
 
-    override def get(o: Orientation): String = o match {
-      case Orientation.top => "arriba"
-      case Orientation.north => "norte"
-      case Orientation.east => "este"
-      case Orientation.south => "sur"
-      case Orientation.west => "oeste"
-      case Orientation.bottom => "abajo"
-    }
-
-  }
 
   "An orientable" should "stay the same rotated to the south and then to the north" in {
     val o = oTest.turn(toSouth).turn(toNorth)
@@ -99,7 +89,7 @@ class IndexedOrientableTest extends FlatSpec {
     assert( o1(bottom) == o2(bottom) )
   }
 
-  "An orientable" should "stay the same rotated four times in every direction" in{
+  "An orientable" should "stay the same rotated four times in any direction" in{
     for( t <- Turn.values ){
       val o = oTest.turn(t).turn(t).turn(t).turn(t)
 
@@ -110,5 +100,23 @@ class IndexedOrientableTest extends FlatSpec {
       assert( o(west) == oTest(west) )
       assert( o(bottom) == oTest(bottom) )
     }
+  }
+
+  "An orientable" should "stay the same after being rotated S-W-N-E three times" in {
+
+    val someTurns = Seq(toSouth,toWest,toNorth,toEast)
+    val turns = someTurns ++ someTurns ++ someTurns
+    val o = turns.foldLeft(oTest) { (orientable, t) =>
+      orientable.turn(t)
+    }
+
+
+    assert( o(top) == oTest(top) )
+    assert( o(north) == oTest(north) )
+    assert( o(east) == oTest(east) )
+    assert( o(south) == oTest(south) )
+    assert( o(west) == oTest(west) )
+    assert( o(bottom) == oTest(bottom) )
+
   }
 }

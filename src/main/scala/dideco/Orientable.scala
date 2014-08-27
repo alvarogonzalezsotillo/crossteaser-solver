@@ -12,7 +12,9 @@ trait Orientable[T] extends (Orientation=>T){
   import Turn.Turn
   import Orientable._
 
-  def get(o:Orientation): T
+  def asSeq(): Seq[T]
+
+  def get(o:Orientation): T = asSeq()(o)
 
   def apply(o:Orientation) = get(o)
 
@@ -22,17 +24,25 @@ trait Orientable[T] extends (Orientation=>T){
 
 object Orientable{
   class IndexedOrientable[T]( val base:Orientable[T],
-                              top:Orientation,
-                              north:Orientation,
-                              east:Orientation,
-                              south:Orientation,
-                              west:Orientation,
-                              bottom:Orientation) extends Orientable[T] {
+                              inTop:Orientation,
+                              inNorth:Orientation,
+                              inEast:Orientation,
+                              inSouth:Orientation,
+                              inWest:Orientation,
+                              inBottom:Orientation) extends Orientable[T] {
 
 
-    val indexArray = Array(top,north,east,south,west,bottom)
+    val indexArray = Array(inTop,inNorth,inEast,inSouth,inWest,inBottom)
+    val asSeq = Orientation.values.map( this )
+    
 
     override def get(o: Orientation): T = base.get(indexArray(o))
+  }
+
+  def apply[T]( inTop: T, inNorth: T, inEast: T, inSouth: T, inWest: T, inBottom: T ) : Orientable[T] ={
+    new Orientable[T]{
+      val asSeq = Seq(inTop,inNorth,inEast,inSouth,inWest,inBottom)
+    }
   }
 
   def turn[T]( o: Orientable[T], t: Turn ) : Orientable[T] = o match {
