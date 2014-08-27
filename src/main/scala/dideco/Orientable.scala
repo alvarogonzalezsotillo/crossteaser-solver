@@ -20,6 +20,11 @@ trait Orientable[T] extends (Orientation=>T){
 
   def turn(t: Turn) : Orientable[T] = Orientable.turn(this,t)
 
+  override lazy val toString = asSeq.mkString("[",",","]")
+
+  override lazy val hashCode  = asSeq.mkString.hashCode
+
+  override def equals(o:Any) = toString.equals(String.valueOf(o))
 }
 
 object Orientable{
