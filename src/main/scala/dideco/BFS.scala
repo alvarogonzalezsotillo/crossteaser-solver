@@ -1,5 +1,8 @@
 package dideco
 
+import com.typesafe.scalalogging.slf4j.LazyLogging
+
+
 /**
  * Created by alvaro on 31/08/2014.
  */
@@ -21,12 +24,14 @@ trait BFS[T]{
 
       path(this)
     }
+
+    override lazy val toString = "<" + depth + ", " + node.toString + ">"
   }
 
-  def search : Option[BFSNode]
+  def search( limit: Int = -1 ) : Option[BFSNode]
 }
 
-object BFS {
+object BFS extends LazyLogging{
 
   type expandFunction[T] = (T) => Seq[T]
   type equalFunction[T] = (T,T) => Boolean
@@ -42,86 +47,121 @@ object BFS {
   }
 
 
-  class BFSImpl[T]( initial:T, expandF: expandFunction[T], compareF: equalFunction[T], foundF: finalFunction[T], heuristicF: heuristicFunction[T] ) extends BFS[T]{
+  class BFSImpl[T : Ordering]( initial:T, expandF: expandFunction[T], compareF: equalFunction[T], foundF: finalFunction[T], heuristicF: heuristicFunction[T] ) extends BFS[T] {
 
 
-    val nodeOrdering = Ordering.by{n : BFSNode => n.depth + heuristicF(n.node)}
+    val nodeOrdering = Ordering.fromLessThan{ (n1: BFSNode, n2: BFSNode) =>
+
+
+      val v1 = n1.depth + heuristicF(n1.node)
+      val v2 = n2.depth + heuristicF(n2.node)
+      val ret = v1 - v2
+      if( ret < 0 ){
+        true
+      }
+      else if( ret > 0 ){
+        false
+      }
+      else{
+        implicitly[Ordering[T]].lt( n1.node,  n2.node )
+      }
+    }
 
     val nodesToExpand = new collection.mutable.TreeSet()(nodeOrdering)
     val nodesExpanded = collection.mutable.Set[BFSNode]()
-    val allNodes = collection.mutable.Map[T,BFSNode]()
+    val allNodes = collection.mutable.Map[T, BFSNode]()
 
-    nodesToExpand += getOrCreateNode(0,null)(initial)
+    nodesToExpand += getOrCreateNode(0, null)(initial)
 
 
-    class BFSNodeImpl( val node: T, val depth: Long, val parent: BFSNode ) extends BFSNode{
+    class BFSNodeImpl(val node: T, val depth: Long, val parent: BFSNode) extends BFSNode {
 
       lazy val children = computeChildren
 
       lazy val rawChildren = expandF(node)
 
-      def computeChildren : Seq[BFSNode] = {
+      def computeChildren: Seq[BFSNode] = {
         rawChildren.
-          filter( !compareF(_,node) ).
-          map( getOrCreateNode(depth+1,this) )
+          filter(!compareF(_, node)).
+          map(getOrCreateNode(depth + 1, this))
       }
 
-      override def equals( o: Any ) : Boolean = o match{
-        case bn:BFSNode => bn.node == node
+      override def equals(o: Any): Boolean = o match {
+        case bn: BFSNode => bn.node == node
         case _ => false
       }
     }
 
 
-    def getOrCreateNode( depth: Long, parent: BFSNode)( n: T ) : BFSNode = {
+    def getOrCreateNode(depth: Long, parent: BFSNode)(n: T): BFSNode = {
       val ret = allNodes.getOrElseUpdate(n, new BFSNodeImpl(n, depth, parent))
-      if (!nodesExpanded.contains(ret)){
+      if (!nodesExpanded.contains(ret)) {
         nodesToExpand += ret
       }
       ret
     }
 
-    def nextNodeToExpand : Option[BFSNode] = {
-      if( nodesToExpand.size > 0 ){
-        Some(nodesToExpand.firstKey)
+    def nextNodeToExpand: Option[BFSNode] = {
+
+      val ret = {
+        if (nodesToExpand.size > 0) {
+          Some(nodesToExpand.firstKey)
+        }
+        else {
+          None
+        }
       }
-      else{
-        None
-      }
+
+      logger.error("nextNodeToExpand:" + ret)
+
+      ret
     }
 
-    def expandNode( n: BFSNode ) : Option[BFSNode] = {
+    def expandNode(n: BFSNode): Option[BFSNode] = {
+
+      logger.error( "expandNode " + n + ": " + n.children.mkString(","))
+
+      nodesToExpand ++= n.children
       nodesToExpand -= n
       nodesExpanded += n
 
-      n.children.map( _.node).find(foundF).map( allNodes )
+      logger.error( "expandNode: nodesToExpand:" + nodesToExpand.mkString(","))
+
+      n.children.map(_.node).find(foundF).map(allNodes)
     }
 
-    def search : Option[BFSNode] = nextNodeToExpand match{
-      case Some(next) =>
+    def search(limit: Int): Option[BFSNode] = {
+      if (limit == 0)
+        None
+      else nextNodeToExpand match {
+        case Some(next) =>
 
-        expandNode(next) match {
-          case Some(n) =>
-            Some(n)
+          expandNode(next) match {
+            case Some(n) =>
+              Some(n)
 
-          case None =>
-            search
-        }
+            case None =>
+              search(limit - 1)
+          }
 
-      case None =>
+        case None =>
           None
+      }
     }
+
   }
 
 
-  def apply[T]( node: T, expandF: expandFunction[T],
+  def apply[T : Ordering]( node: T, expandF: expandFunction[T],
                          compareF: equalFunction[T],
                          foundF: finalFunction[T],
                          lowEstimateToFinal: heuristicFunction[T] ) : BFS[T] = {
+
+    logger.error( "Creando una búsqueda" )
     new BFSImpl[T](node,expandF,compareF,foundF,lowEstimateToFinal)
   }
 
-  def apply[T]( node: T, d: BFSDefinition[T] ) : BFS[T] = apply( node, d.expand _, d.equal _, d.found _ , d.heuristic _ )
+  def apply[T : Ordering]( node: T, d: BFSDefinition[T] ) : BFS[T] = apply( node, d.expand _, d.equal _, d.found _ , d.heuristic _ )
 
 
 }
