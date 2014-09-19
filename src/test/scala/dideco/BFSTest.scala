@@ -19,12 +19,9 @@ class BFSTest extends FlatSpec {
     val node = 1
     val expandF = (_: Int) => Seq[Int]()
 
-    val bfs = BFS[Int](node, expandF, compareF[Int], notFoundF[Int], noEstimate[Int])
+    val bfs = BFS[Int](node, expandF, compareF[Int] _, notFoundF[Int] _, noEstimate[Int] _)
 
     assert(bfs.search.isEmpty)
-    assert(bfs.allNodes.size == 1)
-    assert(bfs.nodesToExpand.size == 0)
-    assert(bfs.nodesExpanded.size == 1)
   }
 
   "From 100 to 1" should "be 100 nodes" in {
@@ -32,13 +29,12 @@ class BFSTest extends FlatSpec {
     val expandF = (i: Int) => Seq(i - 1)
     val foundF = (i: Int) => i == 1
 
-    val bfs = BFS[Int](node, expandF, compareF[Int], foundF, noEstimate[Int])
+    val bfs = BFS[Int](node, expandF, compareF[Int] _ , foundF, noEstimate[Int] _)
 
     val res = bfs.search
     assert(res.isDefined)
     assert(res.get.node == 1)
-    assert(bfs.allNodes.size == 100)
-    assert(bfs.nodesExpanded.size == 99)
+    assert(res.get.pathToRoot.size == 100)
   }
 
 }

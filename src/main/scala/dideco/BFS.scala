@@ -6,6 +6,25 @@ package dideco
 
 
 
+trait BFS[T]{
+  trait BFSNode{
+    def node : T
+    def depth : Long
+    def parent : BFSNode
+    def children : Seq[BFSNode]
+    def pathToRoot : Seq[BFSNode] = {
+
+      def path(n:BFSNode) : List[BFSNode] = n.parent match {
+        case null => List(n)
+        case p => n :: path(p)
+      }
+
+      path(this)
+    }
+  }
+
+  def search : Option[BFSNode]
+}
 
 object BFS {
 
@@ -15,14 +34,16 @@ object BFS {
   type heuristicFunction[T] = (T) => Long
 
 
-  class BFSImpl[T]( initial:T, expandF: expandFunction[T], compareF: equalFunction[T], foundF: finalFunction[T], heuristicF: heuristicFunction[T] ){
+  trait BFSDefinition[T]{
+    def expand( t:T ) : Seq[T]
+    def equal(a:T,b:T) = a==b
+    def found( t:T ) : Boolean
+    def heuristic(t:T) = 0L
+  }
 
-    trait BFSNode{
-      def node : T
-      def depth : Long
-      def parent : BFSNode
-      def children : Seq[BFSNode]
-    }
+
+  class BFSImpl[T]( initial:T, expandF: expandFunction[T], compareF: equalFunction[T], foundF: finalFunction[T], heuristicF: heuristicFunction[T] ) extends BFS[T]{
+
 
     val nodeOrdering = Ordering.by{n : BFSNode => n.depth + heuristicF(n.node)}
 
@@ -96,9 +117,11 @@ object BFS {
   def apply[T]( node: T, expandF: expandFunction[T],
                          compareF: equalFunction[T],
                          foundF: finalFunction[T],
-                         lowEstimateToFinal: heuristicFunction[T] ) = {
+                         lowEstimateToFinal: heuristicFunction[T] ) : BFS[T] = {
     new BFSImpl[T](node,expandF,compareF,foundF,lowEstimateToFinal)
   }
+
+  def apply[T]( node: T, d: BFSDefinition[T] ) : BFS[T] = apply( node, d.expand _, d.equal _, d.found _ , d.heuristic _ )
 
 
 }
