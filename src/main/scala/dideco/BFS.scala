@@ -47,7 +47,8 @@ object BFS extends LazyLogging{
   }
 
 
-  class BFSImpl[T : Ordering]( initial:T, expandF: expandFunction[T], compareF: equalFunction[T], foundF: finalFunction[T], heuristicF: heuristicFunction[T] ) extends BFS[T] {
+  private class BFSImpl[T : Ordering]( initial:T, expandF: expandFunction[T], compareF: equalFunction[T], foundF: finalFunction[T], heuristicF: heuristicFunction[T] ) extends BFS[T] {
+
 
 
     val nodeOrdering = Ordering.fromLessThan{ (n1: BFSNode, n2: BFSNode) =>
