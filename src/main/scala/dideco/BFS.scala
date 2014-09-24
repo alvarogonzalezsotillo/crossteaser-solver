@@ -26,6 +26,7 @@ trait BFS[T]{
     }
 
     override lazy val toString = "<" + depth + ", " + node.toString + ">"
+    override lazy val hashCode = toString.hashCode
   }
 
   def search( limit: Int = -1 ) : Option[BFSNode]
@@ -125,7 +126,7 @@ object BFS extends LazyLogging{
 
       logger.error( "expandNode " + n + ": " + n.children.mkString(","))
 
-      _nodesToExpand ++= n.children
+      _nodesToExpand ++= n.children.filterNot( _expandedNodes.contains(_) )
       _nodesToExpand -= n
       _expandedNodes += n
 

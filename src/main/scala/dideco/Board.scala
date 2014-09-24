@@ -1,6 +1,7 @@
 package dideco
 
 import com.typesafe.scalalogging.slf4j.LazyLogging
+import dideco.BFS.BFSDefinition
 
 
 /**
@@ -38,6 +39,25 @@ trait Board[T] {
   }
 
   override lazy val hashCode = toString.hashCode
+}
+
+object Board{
+
+
+  trait BFSBoardDefinition[T] extends BFS.BFSDefinition[Board[T]]{
+    override def expand(t: Board[T]) = t.oneMovementBoards
+  }
+
+  def exploreAllMovements[T]( board: Board[T] ) = {
+    implicit val boardOrdering = Ordering.by( (b : Board[T]) => b.toString )
+
+    val bfsDef = new BFSBoardDefinition[T] {
+      override def found(t: Board[T]) = false
+    }
+
+    BFS(board,bfsDef)
+  }
+
 }
 
 
