@@ -47,14 +47,7 @@ object OrientablePiece {
   def allPieces : Seq[OrientablePiece] = pieceCache.values.toSeq
   def allOrientables : Seq[OrColor] = orientableCache.values.toSeq
 
-  private def getOrCreatePiece( o: OrColor ) = pieceCache.get(o) match{
-    case Some(piece) =>
-      piece
-    case None =>
-      val ret = new OrientablePieceImpl(orientableCache(o))
-      pieceCache(o) = ret
-      ret
-  }
+  private def getOrCreatePiece( o: OrColor ) = pieceCache.getOrElseUpdate(o, new OrientablePieceImpl(orientableCache(o)))
 
   private class OrientablePieceImpl( override val orientable: OrColor ) extends OrientablePiece{
 
@@ -93,6 +86,8 @@ trait OrientablePiece {
   val orientable : Orientable[Color]
 
   def turn(t:Turn) : OrientablePiece
+
+  override val toString = orientable.toString
 
 
 }

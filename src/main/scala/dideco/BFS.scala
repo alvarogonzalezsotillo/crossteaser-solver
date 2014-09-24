@@ -29,6 +29,9 @@ trait BFS[T]{
   }
 
   def search( limit: Int = -1 ) : Option[BFSNode]
+  def expandedNodes : Seq[BFSNode]
+  def nodesToExpand : Seq[BFSNode]
+  def allNodes = expandedNodes ++ nodesToExpand
 }
 
 object BFS extends LazyLogging{
@@ -49,10 +52,7 @@ object BFS extends LazyLogging{
 
   private class BFSImpl[T : Ordering]( initial:T, expandF: expandFunction[T], compareF: equalFunction[T], foundF: finalFunction[T], heuristicF: heuristicFunction[T] ) extends BFS[T] {
 
-
-
     val nodeOrdering = Ordering.fromLessThan{ (n1: BFSNode, n2: BFSNode) =>
-
 
       val v1 = n1.depth + heuristicF(n1.node)
       val v2 = n2.depth + heuristicF(n2.node)
@@ -68,12 +68,15 @@ object BFS extends LazyLogging{
       }
     }
 
-    val nodesToExpand = new collection.mutable.TreeSet()(nodeOrdering)
-    val nodesExpanded = collection.mutable.Set[BFSNode]()
-    val allNodes = collection.mutable.Map[T, BFSNode]()
+    val _nodesToExpand = new collection.mutable.TreeSet()(nodeOrdering)
+    val _expandedNodes = collection.mutable.Set[BFSNode]()
+    val _allNodes = collection.mutable.Map[T, BFSNode]()
 
-    nodesToExpand += getOrCreateNode(0, null)(initial)
+    _nodesToExpand += getOrCreateNode(0, null)(initial)
 
+
+    override def expandedNodes = _expandedNodes.toSeq
+    override def nodesToExpand = _nodesToExpand.toSeq
 
     class BFSNodeImpl(val node: T, val depth: Long, val parent: BFSNode) extends BFSNode {
 
@@ -95,9 +98,9 @@ object BFS extends LazyLogging{
 
 
     def getOrCreateNode(depth: Long, parent: BFSNode)(n: T): BFSNode = {
-      val ret = allNodes.getOrElseUpdate(n, new BFSNodeImpl(n, depth, parent))
-      if (!nodesExpanded.contains(ret)) {
-        nodesToExpand += ret
+      val ret = _allNodes.getOrElseUpdate(n, new BFSNodeImpl(n, depth, parent))
+      if (!_expandedNodes.contains(ret)) {
+        _nodesToExpand += ret
       }
       ret
     }
@@ -105,8 +108,8 @@ object BFS extends LazyLogging{
     def nextNodeToExpand: Option[BFSNode] = {
 
       val ret = {
-        if (nodesToExpand.size > 0) {
-          Some(nodesToExpand.firstKey)
+        if (_nodesToExpand.size > 0) {
+          Some(_nodesToExpand.firstKey)
         }
         else {
           None
@@ -122,13 +125,13 @@ object BFS extends LazyLogging{
 
       logger.error( "expandNode " + n + ": " + n.children.mkString(","))
 
-      nodesToExpand ++= n.children
-      nodesToExpand -= n
-      nodesExpanded += n
+      _nodesToExpand ++= n.children
+      _nodesToExpand -= n
+      _expandedNodes += n
 
-      logger.error( "expandNode: nodesToExpand:" + nodesToExpand.mkString(","))
+      logger.error( "expandNode: nodesToExpand:" + _nodesToExpand.mkString(","))
 
-      n.children.map(_.node).find(foundF).map(allNodes)
+      n.children.map(_.node).find(foundF).map(_allNodes)
     }
 
     def search(limit: Int): Option[BFSNode] = {

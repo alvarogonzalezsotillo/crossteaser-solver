@@ -1,6 +1,7 @@
 package dideco
 
-import dideco.Turn.Turn
+import com.typesafe.scalalogging.slf4j.LazyLogging
+
 
 /**
  * Created by alvaro on 21/09/2014.
@@ -10,9 +11,6 @@ import dideco.Turn.Turn
 trait Board[T] {
 
 
-
-  import dideco.Board._
-
   val columns: Int
   val rows: Int
 
@@ -20,58 +18,38 @@ trait Board[T] {
 
   def locationOf(piece: T): Location
 
-  def inside( l: Location ) = l.col > 0 && l.col < columns && l.row > 0 && l.row < rows
+  def inside(l: Location) = l.col >= 0 && l.col < columns && l.row >= 0 && l.row < rows
+
 
   override lazy val toString = {
-    val strings = for (r <- 0 to rows) yield {
-      (for (c <- 0 to columns) yield {
+    val strings = for (r <- 0 until rows) yield {
+      (for (c <- 0 until columns) yield {
         String.valueOf(pieceAt(c, r))
       }).mkString("{", ",", "}")
     }
     strings.mkString("{", ",", "}")
   }
 
-  def oneMovementBoards : Seq[Board[T]]
+  val oneMovementBoards: Seq[Board[T]]
+
+  override def equals(a: Any) = a match {
+    case b: Board[_] => b.toString == toString
+    case _ => false
+  }
+
+  override lazy val hashCode = toString.hashCode
 }
 
 
-object Board {
+object OnePieceBoard extends LazyLogging {
 
-  object Location{
-    val increments = Map(
-      Turn.toEast -> (1,0),
-      Turn.toNorth -> (0,-1),
-      Turn.toSouth -> (0,1),
-      Turn.toWest -> (-1,0)
-    )
 
-    implicit def toLocation( p: (Int,Int) ) = new Location(p._1,p._2)
-    implicit def toPair( l: Location ) = (l.col,l.row)
-    def apply( col:Int, row: Int) = new Location(col,row)
-  }
+  def apply(width: Int, height: Int, piece: OrientablePiece, location: Location): Board[OrientablePiece] = {
 
-  class Location( val col:Int, val row:Int ){
 
-    import Location._
-
-    def add( p: (Int,Int) ) = {
-      val c = col + p._1
-      val r = row + p._2
-      Location(c,r)
-    }
-
-    def to( t: Turn ) = add( increments(t) )
-
-  }
-
-  def apply(width: Int, height: Int, piece: OrientablePiece, location: Location) : Board[OrientablePiece]= {
-
-    val w = width
-    val h = height
-
-    new Board[OrientablePiece]{
-      val columns = w
-      val rows = h
+    new Board[OrientablePiece] {
+      override val columns: Int = width
+      override val rows: Int = height
 
       def locationOf(p: OrientablePiece) = if (p == piece) location else null
 
@@ -82,14 +60,14 @@ object Board {
           null
       }
 
-      def oneMovementBoards = {
+      lazy val oneMovementBoards = {
         val boards = Turn.values.map { t =>
           val newLocation = location.to(t)
-          val newPiece = piece.turn( if(Turn.horizontal(t)) t else Turn.opposite(t) )
-          (newLocation, apply( width, height, newPiece, newLocation ) )
+          val newPiece = piece.turn(if (Turn.horizontal(t)) t else Turn.opposite(t))
+          (newLocation, apply(width, height, newPiece, newLocation))
         }
 
-        boards.filter{ case (l,b) => b.inside(l) }.map( _._2 ).toSeq
+        boards.filter { case (l, b) => b.inside(l)}.map(_._2).toSeq
       }
     }
   }
