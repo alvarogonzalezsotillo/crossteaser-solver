@@ -32,9 +32,9 @@ class BFSOnePieceBoardTest extends FlatSpec {
     val bfs = Board.exploreAllMovements(board)
     val found = bfs.search()
 
-    assert( found.isEmpty )
 
-    ???
+    assert( found.isEmpty )
+    assert( bfs.allNodes.size == 108 )
   }
 
 }

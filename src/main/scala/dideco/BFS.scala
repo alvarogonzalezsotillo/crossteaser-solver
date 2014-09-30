@@ -10,6 +10,9 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
 
 
 trait BFS[T]{
+
+  val bfsNodeOrdering = Ordering.by( (n: BFSNode) => n.node.toString )
+
   trait BFSNode{
     def node : T
     def depth : Long
@@ -91,9 +94,8 @@ object BFS extends LazyLogging{
           map(getOrCreateNode(depth + 1, this))
       }
 
-      override def equals(o: Any): Boolean = o match {
-        case bn: BFSNode => bn.node == node
-        case _ => false
+      override def equals(o: Any): Boolean = {
+        toString == String.valueOf(o)
       }
     }
 

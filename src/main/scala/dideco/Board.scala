@@ -83,12 +83,12 @@ object Board extends LazyLogging{
         case i  => locationFromIndex(i)
       }
 
-      override val oneMovementBoards: Seq[Board[OrientablePiece]] = {
+      override lazy val oneMovementBoards: Seq[Board[OrientablePiece]] = {
         val turns = Turn.values.toArray
         for( c <- 0 until columns ;
-             r <- 0 until rows if( free(c,r) ) ;
+             r <- 0 until rows if( !free(c,r) ) ;
              location = Location(c,r) ;
-             piece = pieceAt(location) if ( !free(location) ) ;
+             piece = pieceAt(location);
              t  <- turns ;
              newLocation = location.to(t) if( inside(newLocation) && free(newLocation) ) ;
              newPiece = piece.turn(if (Turn.horizontal(t)) t else Turn.opposite(t) ) ) yield{
