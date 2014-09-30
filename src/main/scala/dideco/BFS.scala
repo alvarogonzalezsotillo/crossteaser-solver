@@ -2,6 +2,8 @@ package dideco
 
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
+import scala.annotation.tailrec
+
 
 /**
  * Created by alvaro on 31/08/2014.
@@ -119,41 +121,47 @@ object BFS extends LazyLogging{
         }
       }
 
-      logger.error("nextNodeToExpand:" + ret)
+      logger.debug("nextNodeToExpand:" + ret)
 
       ret
     }
 
     def expandNode(n: BFSNode): Option[BFSNode] = {
 
-      logger.error( "expandNode " + n + ": " + n.children.mkString(","))
+      logger.debug( "expandNode " + n + ": " + n.children.mkString(","))
 
       _nodesToExpand ++= n.children.filterNot( _expandedNodes.contains(_) )
       _nodesToExpand -= n
       _expandedNodes += n
 
-      logger.error( "expandNode: nodesToExpand:" + _nodesToExpand.mkString(","))
+      logger.debug( "expandNode: nodesToExpand:" + _nodesToExpand.mkString(","))
 
       n.children.map(_.node).find(foundF).map(_allNodes)
     }
 
     def search(limit: Int): Option[BFSNode] = {
-      if (limit == 0)
-        None
-      else nextNodeToExpand match {
-        case Some(next) =>
 
-          expandNode(next) match {
-            case Some(n) =>
-              Some(n)
-
-            case None =>
-              search(limit - 1)
-          }
-
-        case None =>
+      @tailrec
+      def search_tailrec(limit: Int) : Option[BFSNode] = {
+        if (limit == 0)
           None
+        else nextNodeToExpand match {
+          case Some(next) =>
+
+            expandNode(next) match {
+              case Some(n) =>
+                Some(n)
+
+              case None =>
+                search_tailrec(limit - 1)
+            }
+
+          case None =>
+            None
+        }
       }
+
+      search_tailrec(limit)
     }
 
   }
@@ -164,7 +172,7 @@ object BFS extends LazyLogging{
                          foundF: finalFunction[T],
                          lowEstimateToFinal: heuristicFunction[T] ) : BFS[T] = {
 
-    logger.error( "Creando una búsqueda" )
+    logger.debug( "Creando una búsqueda" )
     new BFSImpl[T](node,expandF,compareF,foundF,lowEstimateToFinal)
   }
 
