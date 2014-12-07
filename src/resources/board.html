@@ -1,0 +1,41 @@
+<html>
+
+
+    <head>
+
+
+        <script type="text/javascript" src="js/jquery-1.10.2.js">
+        </script>
+
+        <script type="text/javascript" src="js/jquery-ui-1.10.4.js">
+        </script>
+
+        <script type="text/javascript" src="board.js">
+
+        </script>
+
+        <script lang="javascript">
+
+
+            function ready(){
+                var elem = $("#aqui");
+                var board = new Board( new Array( new Array("R","G"), new Array("R","G" ) ) );
+                board.render( elem );
+            }
+
+            $(document).ready(ready);
+
+        </script>
+
+    </head>
+    <body>
+
+        Aqui va el span
+        <span id="aqui">
+
+        </span>
+        ya esta el span
+
+    </body>
+
+</html>

@@ -23,7 +23,7 @@ class BFSOnePieceBoardTest extends FlatSpec {
   }
 
 
-  "A 3x3 board" should "have a lot of posibilities" in{
+  "A 3x3 board" should "have 108 posibilities" in{
 
 
     val piece = OrientablePiece.from( OrientablePiece.originalOrientable )
@@ -36,5 +36,23 @@ class BFSOnePieceBoardTest extends FlatSpec {
     assert( found.isEmpty )
     assert( bfs.allNodes.size == 108 )
   }
+
+  "A 3x3 board" should "have same number of posibilities if starting from corner or edge" in{
+
+
+    val piece = OrientablePiece.from( OrientablePiece.originalOrientable )
+    val cornerBoard = OnePieceBoard(3,3,piece,Location(0,0))
+    val edgeBoard = OnePieceBoard(3,3,piece,Location(1,0))
+
+    val cornerBfs = Board.exploreAllMovements(cornerBoard)
+    val edgeBfs = Board.exploreAllMovements(cornerBoard)
+    val cornerFound = cornerBfs.search()
+    val edgeFound = edgeBfs.search()
+
+
+    assert( cornerBfs.allNodes.size == edgeBfs.allNodes.size )
+    assert( cornerBfs.allNodes.toSet == edgeBfs.allNodes.toSet )
+  }
+
 
 }
