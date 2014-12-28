@@ -179,7 +179,7 @@ object BFS extends LazyLogging{
                          foundF: finalFunction[T],
                          lowEstimateToFinal: heuristicFunction[T] ) : BFS[T] = {
 
-    logger.debug( "Creando una búsqueda" )
+    logger.debug( "Creando una busqueda" )
     new BFSImpl[T](node,expandF,compareF,foundF,lowEstimateToFinal)
   }
 
