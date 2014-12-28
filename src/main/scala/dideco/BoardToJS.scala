@@ -7,7 +7,38 @@ import java.io.PrintStream
  */
 object BoardToJS {
 
-  def apply( b: Board, out: PrintStream ): Unit ={
+  def apply( b: Board[OrientablePiece], out: PrintStream ){
+    out.println( "new Board(" )
+    out.println( "  [" )
 
+    for( r <- 0 until b.rows ){
+      out.println( "    [" )
+      for( c <- 0 until b.columns ) {
+        val piece = b.pieceAt(c, r)
+        out.print( "      new Piece(" )
+        if( piece != null ) {
+          val p = piece.orientable.
+            asSeq().
+            mkString("'", "','", "'")
+          out.print( p  )
+        }
+        out.print( ")" )
+        out.println( if (c == b.columns-1) "" else "," )
+      }
+      out.print( "    ]" )
+      out.println( if (r == b.rows-1) "" else "," )
+    }
+    out.println( "  ]" )
+    out.println( ")")
+  }
+
+  def apply( boards: Seq[Board[OrientablePiece]], out: PrintStream ) {
+    out.println("[")
+    val array = boards.toArray
+    for (i <- 0 until array.size) {
+      apply(array(i), out)
+      out.println(if (i == array.size - 1) "" else ",")
+    }
+    out.println("]")
   }
 }

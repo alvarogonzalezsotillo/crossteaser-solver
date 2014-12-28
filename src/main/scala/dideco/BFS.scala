@@ -38,6 +38,8 @@ trait BFS[T]{
   def expandedNodes : Seq[BFSNode]
   def nodesToExpand : Seq[BFSNode]
   def allNodes = expandedNodes ++ nodesToExpand
+
+  override def toString = s"expandedNodes:${expandedNodes.size}  nodesToExpand:${nodesToExpand.size}"
 }
 
 object BFS extends LazyLogging{
@@ -130,13 +132,18 @@ object BFS extends LazyLogging{
 
       logger.debug( "expandNode " + n + ": " + n.children.mkString(","))
 
-      _nodesToExpand ++= n.children.filterNot( _expandedNodes.contains(_) )
-      _nodesToExpand -= n
-      _expandedNodes += n
+      if( foundF(n.node) ){
+        Some(n)
+      }
+      else {
+        _nodesToExpand ++= n.children.filterNot(_expandedNodes.contains(_))
+        _nodesToExpand -= n
+        _expandedNodes += n
 
-      logger.debug( "expandNode: nodesToExpand:" + _nodesToExpand.mkString(","))
+        logger.debug("expandNode: nodesToExpand:" + _nodesToExpand.mkString(","))
 
-      n.children.map(_.node).find(foundF).map(_allNodes)
+        n.children.map(_.node).find(foundF).map(_allNodes)
+      }
     }
 
     def search(limit: Int): Option[BFSNode] = {

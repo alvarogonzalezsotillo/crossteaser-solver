@@ -106,10 +106,83 @@ class BFSBoardTest extends FlatSpec {
     val bfs = Board.exploreAllMovements(board)
     val found = bfs.search()
 
-    assert(found.isEmpty == found.isEmpty)
+    assert(found.isEmpty == true)
     assert(bfs.allNodes.size == 1)
-
   }
 
+
+  "A 3x3 one piece board" should "be resolved in 0 movements" in{
+    val piece = OrientablePiece.from( "G", "R" ).head
+    val board = Board(3,3,Seq(piece,null,null,null,null,null,null,null,null))
+    val goalB = board
+
+    val bfs = Board.explorePathTo(board,goalB)
+    val found = bfs.search()
+
+    assert( found.isDefined == true )
+    assert( found.get.node == goalB )
+    assert( found.get.pathToRoot.size == 1 )
+  }
+
+  "A 3x3 one piece board" should "be resolved in 1 movement" in{
+    val piece = OrientablePiece.from( "G", "R" ).head
+    val board = Board(3,3,Seq(piece,null,null,null,null,null,null,null,null))
+
+    val goalP = OrientablePiece.from( "Y", "R").head
+    val goalB = Board(3,3,Seq(null,goalP,null,null,null,null,null,null,null))
+
+    val bfs = Board.explorePathTo(board,goalB)
+    val found = bfs.search()
+
+    assert( found.isDefined == true )
+    assert( found.get.node == goalB )
+    assert( found.get.pathToRoot.size == 2 )
+  }
+
+  "A 3x3 one piece board" should "be resolved in 2 movement" in{
+    val piece = OrientablePiece.from( "B", "Y" ).head
+    val board = Board(3,3,Seq(piece,null,null,null,null,null,null,null,null))
+
+    val goalP = OrientablePiece.from( "R", "P").head
+    val goalB = Board(3,3,Seq(null,null,null,null,null,null,goalP,null,null))
+
+    val bfs = Board.explorePathTo(board,goalB)
+    val found = bfs.search()
+
+    assert( found.isDefined == true )
+    assert( found.get.node == goalB )
+    assert( found.get.pathToRoot.size == 3 )
+  }
+
+
+  "A 3x3 one piece board" should "be resolved in 3 movement" in{
+    val piece = OrientablePiece.from( "B", "Y" ).head
+    val board = Board(3,3,Seq(piece,null,null,null,null,null,null,null,null))
+
+    val goalP = OrientablePiece.from( "O", "P").head
+    val goalB = Board(3,3,Seq(null,null,null,null,null,null,null,goalP,null))
+
+    val bfs = Board.explorePathTo(board,goalB)
+    val found = bfs.search()
+
+    assert( found.isDefined == true )
+    assert( found.get.node == goalB )
+    assert( found.get.pathToRoot.size == 4 )
+  }
+
+  "A 3x3 one piece board" should "be resolved in 4 movements" in{
+    val piece = OrientablePiece.from( "B", "Y" ).head
+    val board = Board(3,3,Seq(piece,null,null,null,null,null,null,null,null))
+
+    val goalP = OrientablePiece.from( "B", "P").head
+    val goalB = Board(3,3,Seq(null,null,null,null,null,null,null,null,goalP))
+
+    val bfs = Board.explorePathTo(board,goalB)
+    val found = bfs.search()
+
+    assert( found.isDefined == true )
+    assert( found.get.node == goalB )
+    assert( found.get.pathToRoot.size == 5 )
+  }
 
 }

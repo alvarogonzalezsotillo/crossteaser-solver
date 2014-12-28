@@ -61,6 +61,18 @@ object Board extends LazyLogging{
     BFS(board,bfsDef)
   }
 
+  def explorePathTo[T]( board: Board[T], goal: Board[T] ) = {
+    implicit val boardOrdering = Ordering.by( (b : Board[T]) => b.toString )
+
+    val bfsDef = new BFSBoardDefinition[T] {
+      override def found(t: Board[T]) = {
+        logger.error( s"explorePathTo.found: ${t} == ${goal} : ${t == goal }" )
+        t == goal
+      }
+    }
+    BFS(board,bfsDef)
+  }
+
   def apply( width: Int, height: Int, pieces : Seq[OrientablePiece] ) : Board[OrientablePiece] = {
     assert( pieces.size == width * height )
 
