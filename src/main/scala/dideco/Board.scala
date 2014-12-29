@@ -4,6 +4,8 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
 import dideco.BFS.BFSDefinition
 import dideco.OrientablePiece.Color.Color
 
+import scala.util.Random
+
 
 /**
  * Created by alvaro on 21/09/2014.
@@ -48,82 +50,12 @@ trait Board[T] {
 
 object Board extends LazyLogging {
 
-
+  private val random = new java.util.Random()
 
   trait BFSBoardDefinition[T] extends BFS.BFSDefinition[Board[T]] {
     override def expand(t: Board[T]) = t.oneMovementBoards
   }
 
-
-  def solvePerfectly(board: Board[OrientablePiece]) = {
-    implicit val boardOrdering = Ordering.by((b: Board[OrientablePiece]) => b.toString)
-
-    val bfsDef = new BFSBoardDefinition[OrientablePiece] {
-      override def found(t: Board[OrientablePiece]) = {
-        val pieces = t.allPieces.filter(_ != null)
-        val topSides = pieces.map( _.orientable.get(Orientation.top) )
-        val northSides = pieces.map( _.orientable.get(Orientation.north) )
-        topSides.forall( _ == topSides.head ) && northSides.forall( _ == northSides.head )
-      }
-
-      override def heuristic(t:Board[OrientablePiece] ) = {
-        val pieces = t.allPieces.filter(_ != null)
-        val topSides = pieces.map( _.orientable.get(Orientation.top) )
-        8 - topSides.groupBy(c=>c).map{ case(key,values) => values.size }.max
-      }
-    }
-
-    BFS(board, bfsDef)
-  }
-
-
-
-  def solveTopColor(board: Board[OrientablePiece]) = {
-    implicit val boardOrdering = Ordering.by((b: Board[OrientablePiece]) => b.toString)
-
-    val bfsDef = new BFSBoardDefinition[OrientablePiece] {
-      override def found(t: Board[OrientablePiece]) = {
-        functionalFound(t)
-      }
-
-      def imperativeFound( t :Board[OrientablePiece] ) : Boolean = {
-        var i = 0
-        val pieces = t.allPieces
-        var topColor : Color = null
-        while( i < pieces.size ) {
-          val p = pieces(i)
-          if( p != null ) {
-            val c = p.orientable.get(Orientation.top)
-            if( topColor == null ) {
-              topColor = c
-            }
-            else {
-              if( topColor != c ) {
-                return false
-              }
-            }
-          }
-          i += 1
-        }
-        true
-      }
-
-      def functionalFound( t :Board[OrientablePiece] ) = {
-        val pieces = t.allPieces.filter(_ != null)
-        val topSides = pieces.map( _.orientable.get(Orientation.top) )
-        topSides.forall( _ == topSides.head )
-      }
-
-      override def heuristic(t:Board[OrientablePiece] ) = {
-        val pieces = t.allPieces.filter(_ != null)
-        val topSides = pieces.map( _.orientable.get(Orientation.top) )
-        8 - topSides.groupBy(c=>c).map{ case(key,values) => values.size }.max
-      }
-
-    }
-
-    BFS(board, bfsDef)
-  }
 
   def exploreAllMovements[T]( board: Board[T] ) = {
     implicit val boardOrdering = Ordering.by((b: Board[T]) => b.toString)
@@ -134,6 +66,15 @@ object Board extends LazyLogging {
 
     BFS(board,bfsDef)
   }
+
+  def scrambled[T](board: Board[T], steps: Int) : Board[T] = steps match{
+    case n if n <= 0 => board
+    case n =>
+      val posibleSteps = board.oneMovementBoards
+      val nextStep = posibleSteps( random.nextInt(posibleSteps.size) )
+      scrambled(nextStep, n-1)
+  }
+
 
   def explorePathTo[T]( board: Board[T], goal: Board[T] ) = {
     implicit val boardOrdering = Ordering.by((b: Board[T]) => b.toString)
