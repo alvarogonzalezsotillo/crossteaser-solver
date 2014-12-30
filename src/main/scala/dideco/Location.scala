@@ -15,7 +15,15 @@ object Location{
 
   implicit def toLocation( p: (Int,Int) ) = new Location(p._1,p._2)
   implicit def toPair( l: Location ) = (l.col,l.row)
-  def apply( col:Int, row: Int) = new Location(col,row)
+
+  private val cache = collection.mutable.Map[Int,collection.mutable.Map[Int,Location]]()
+
+  private def getFromCache( col:Int, row: Int ) = {
+    val level1 = cache.getOrElseUpdate( col, collection.mutable.Map[Int,Location]() )
+    level1.getOrElseUpdate( row, new Location(col,row) )
+  }
+
+  def apply( col:Int, row: Int) = getFromCache(col, row )
 }
 
 class Location( val col:Int, val row:Int ){

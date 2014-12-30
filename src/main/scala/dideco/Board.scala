@@ -25,11 +25,12 @@ trait Board[T] {
 
   def locationOf(piece: T): Location
 
-  def inside(l: Location) = l.col >= 0 && l.col < columns && l.row >= 0 && l.row < rows
+  def inside(l: Location) : Boolean = inside( l.col, l.row )
+  def inside(col: Int, row: Int ) = col >= 0 && col < columns && row >= 0 && row < rows
 
   def allPieces : IndexedSeq[T] = (for( r <- 0 until rows ; c <- 0 until columns ) yield pieceAt(c,r)).toIndexedSeq
 
-  override lazy val toString = {
+  override def toString = {
     val strings = for (r <- 0 until rows) yield {
       (for (c <- 0 until columns) yield {
         String.valueOf(pieceAt(c, r))
@@ -38,14 +39,29 @@ trait Board[T] {
     strings.mkString("{", ",", "}")
   }
 
+  lazy val toShortString = toString
+
   val oneMovementBoards: Seq[Board[T]]
 
   override def equals(a: Any) = a match {
-    case b: Board[_] => b.toString == toString
+    case b: Board[_] => b.toShortString == toShortString
     case _ => false
   }
 
   override lazy val hashCode = toString.hashCode
+}
+
+
+trait BoardOfOrientablePieces extends Board[OrientablePiece]{
+  override lazy val toShortString = {
+    val strings = for (r <- 0 until rows) yield {
+      (for (c <- 0 until columns) yield {
+        val p = pieceAt(c, r)
+        if( p != null ) p.toShortString else "null"
+      }).mkString("{", ",", "}")
+    }
+    strings.mkString("{", ",", "}")
+  }
 }
 
 object Board extends LazyLogging {
@@ -89,7 +105,7 @@ object Board extends LazyLogging {
     assert( pieces.size == width * height )
 
 
-    new Board[OrientablePiece]{
+    new BoardOfOrientablePieces{
       override val columns = width
       override val rows = height
 
@@ -106,6 +122,7 @@ object Board extends LazyLogging {
         case -1 =>  null
         case i  => locationFromIndex(i)
       }
+
 
       override lazy val oneMovementBoards: Seq[Board[OrientablePiece]] = {
         val turns = Turn.values.toArray
@@ -134,7 +151,7 @@ object OnePieceBoard extends LazyLogging {
   def apply(width: Int, height: Int, piece: OrientablePiece, location: Location): Board[OrientablePiece] = {
 
 
-    new Board[OrientablePiece] {
+    new BoardOfOrientablePieces {
       override val columns: Int = width
       override val rows: Int = height
 

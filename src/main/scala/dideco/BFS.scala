@@ -39,7 +39,14 @@ trait BFS[T]{
   def nodesToExpand : Seq[BFSNode]
   def allNodes = expandedNodes ++ nodesToExpand
 
-  override def toString = s"expandedNodes:${expandedNodes.size}  nodesToExpand:${nodesToExpand.size}"
+  object currentInfo{
+    def numberOfExpandedNodes = expandedNodes.size
+    def numberOfNodesToExpand = nodesToExpand.size
+
+    override def toString = s"expandedNodes:${expandedNodes.size}  nodesToExpand:${nodesToExpand.size}"
+  }
+
+  override def toString = currentInfo.toString
 }
 
 object BFS extends LazyLogging{
@@ -90,10 +97,9 @@ object BFS extends LazyLogging{
 
       lazy val children = computeChildren
 
-      lazy val rawChildren = expandF(node)
 
       def computeChildren: Seq[BFSNode] = {
-        rawChildren.
+        expandF(node).
           filter(!compareF(_, node)).
           map(getOrCreateNode(depth + 1, this))
       }
@@ -154,6 +160,8 @@ object BFS extends LazyLogging{
           None
         else nextNodeToExpand match {
           case Some(next) =>
+
+            if( limit % 1000 == 0 ) logger.error( s"limit $limit, expanding $next" )
 
             expandNode(next) match {
               case Some(n) =>

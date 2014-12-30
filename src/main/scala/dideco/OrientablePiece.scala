@@ -89,5 +89,6 @@ trait OrientablePiece {
 
   override val toString = orientable.toString
 
+  val toShortString = orientable.toShortString
 
 }

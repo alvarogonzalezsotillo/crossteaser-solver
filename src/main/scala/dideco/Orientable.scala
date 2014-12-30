@@ -18,9 +18,14 @@ trait Orientable[T] extends (Orientation=>T){
 
   def apply(o:Orientation) = get(o)
 
+  def where(t:T) = Orientation.values.find( get(_) == t ).get
+
   def turn(t: Turn) : Orientable[T] = Orientable.turn(this,t)
 
   override lazy val toString = asSeq.mkString("[",",","]")
+
+  lazy val toShortString = asSeq.take(2).mkString("[",",","]")
+
 
   override lazy val hashCode  = asSeq.mkString.hashCode
 

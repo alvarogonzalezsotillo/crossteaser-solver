@@ -53,4 +53,24 @@ class BFSTest extends FlatSpec {
     assert( res.get.pathToRoot.map( _.node ) == Seq( "abab", "aba", "ab", "a", "" ) )
   }
 
+  "abab" should "be generated without duplicated nodes" in{
+    val node = ""
+    val definition = new BFSDefinition[String]{
+      def expand( t: String ) = if( t.size > 0 )
+        Seq( t.slice(0,t.size-2), t + "a", t + "b" )
+      else
+        Seq( t + "a", t + "b" )
+      def found( t:String ) = t == "abab"
+    }
+
+    val bfs = BFS( node, definition )
+    val res = bfs.search()
+    assert( res.isDefined )
+
+    val expandedNodes = bfs.expandedNodes
+    val allNodes = bfs.allNodes
+    assert( expandedNodes.flatMap( _.children ).forall( child => allNodes.exists( child eq _ ) ) )
+  }
+
+
 }
