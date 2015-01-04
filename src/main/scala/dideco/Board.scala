@@ -2,7 +2,8 @@ package dideco
 
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import dideco.BFS.BFSDefinition
-import dideco.OrientablePiece.Color.Color
+
+import dideco.OrientableColor.Color.Color
 
 import scala.util.Random
 
@@ -52,7 +53,7 @@ trait Board[T] {
 }
 
 
-trait BoardOfOrientablePieces extends Board[OrientablePiece]{
+trait BoardOfOrientablePieces extends Board[Orientable[Color]]{
   override lazy val toShortString = {
     val strings = for (r <- 0 until rows) yield {
       (for (c <- 0 until columns) yield {
@@ -101,7 +102,7 @@ object Board extends LazyLogging {
     BFS(board,bfsDef)
   }
 
-  def apply( width: Int, height: Int, pieces : IndexedSeq[OrientablePiece] ) : Board[OrientablePiece] = {
+  def apply( width: Int, height: Int, pieces : IndexedSeq[Orientable[Color]] ) : Board[Orientable[Color]] = {
     assert( pieces.size == width * height )
 
 
@@ -114,17 +115,17 @@ object Board extends LazyLogging {
 
       def indexFromLocation( l: Location ) : Int = indexFromLocation(l.col, l.row )
 
-      override def pieceAt(column: Int, row: Int): OrientablePiece = pieces( indexFromLocation(column, row) )
+      override def pieceAt(column: Int, row: Int): Orientable[Color] = pieces( indexFromLocation(column, row) )
 
-      override val allPieces : IndexedSeq[OrientablePiece] = pieces
+      override val allPieces : IndexedSeq[Orientable[Color]] = pieces
 
-      override def locationOf(piece: OrientablePiece): Location = pieces.indexOf(piece) match{
+      override def locationOf(piece: Orientable[Color]): Location = pieces.indexOf(piece) match{
         case -1 =>  null
         case i  => locationFromIndex(i)
       }
 
 
-      override lazy val oneMovementBoards: Seq[Board[OrientablePiece]] = {
+      override lazy val oneMovementBoards: Seq[Board[Orientable[Color]]] = {
         val turns = Turn.values.toArray
         for( c <- 0 until columns ;
              r <- 0 until rows if( !free(c,r) ) ;
@@ -148,14 +149,14 @@ object Board extends LazyLogging {
 object OnePieceBoard extends LazyLogging {
 
 
-  def apply(width: Int, height: Int, piece: OrientablePiece, location: Location): Board[OrientablePiece] = {
+  def apply(width: Int, height: Int, piece: Orientable[Color], location: Location): Board[Orientable[Color]] = {
 
 
     new BoardOfOrientablePieces {
       override val columns: Int = width
       override val rows: Int = height
 
-      def locationOf(p: OrientablePiece) = if (p == piece) location else null
+      def locationOf(p: Orientable[Color]) = if (p == piece) location else null
 
       def pieceAt(column: Int, row: Int) = {
         if (location._1 == column && location._2 == row)
@@ -164,14 +165,20 @@ object OnePieceBoard extends LazyLogging {
           null
       }
 
-      lazy val oneMovementBoards = {
-        val boards = Turn.values.map { t =>
-          val newLocation = location.to(t)
-          val newPiece = piece.turn(if (Turn.horizontal(t)) t else Turn.opposite(t))
-          (newLocation, apply(width, height, newPiece, newLocation))
-        }
+      lazy val oneMovementBoards : Seq[Board[Orientable[Color]]]= {
 
-        boards.filter { case (l, b) => b.inside(l)}.map(_._2).toSeq
+
+        val ret = for (t <- Turn.values.toArray) yield {
+          val newLocation = location.to(t)
+          if (inside(newLocation)) {
+            val newPiece = piece.turn(if (Turn.horizontal(t)) t else Turn.opposite(t))
+            apply(width, height, newPiece, newLocation)
+          }
+          else {
+            null
+          }
+        }
+        ret.filter( _ != null )
       }
     }
   }

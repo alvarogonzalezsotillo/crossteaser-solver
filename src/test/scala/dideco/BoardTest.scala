@@ -14,7 +14,7 @@ class BoardTest extends FlatSpec {
 
 
   "The two implementations of one piece board" should "give the same positions in a 2x2 board with one piece" in{
-    val piece = OrientablePiece.from( OrientablePiece.originalOrientable )
+    val piece = OrientableColor.originalOrientable
 
     val board1 = OnePieceBoard(2,2,piece,Location(0,0))
     val board2 = Board(2,2, IndexedSeq(piece,null,null,null) )

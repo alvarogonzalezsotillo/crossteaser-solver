@@ -1,6 +1,8 @@
 package dideco
 
-import dideco.OrientablePiece.Color
+import dideco.OrientableColor.Color
+import dideco.OrientableColor.Color
+import dideco.OrientableColor.Color.Color
 
 /**
  * Created by alvaro on 28/12/14.
@@ -16,7 +18,7 @@ object Main extends App{
   }
 
 
-  def P( sides : String* ) = OrientablePiece.from(sides:_*).head
+  def P( sides : String* ) = OrientableColor.from(sides:_*).head
 
   val board = Board( 3, 3, IndexedSeq(
     P("Y","O"), P("G","B"), P("R","P"),
@@ -26,6 +28,7 @@ object Main extends App{
 
   measure {
     val bfs = CrossTeaser.solvePerfectly(board, Color("Y").get, Color("O").get )
+    //val bfs = CrossTeaser.solveTopColor(board, Color("Y").get, CrossTeaser.stepsToTop(_, Color("Y").get) )
 
     val found = bfs.search()
 

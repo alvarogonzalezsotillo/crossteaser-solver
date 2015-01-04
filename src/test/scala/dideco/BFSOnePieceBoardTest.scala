@@ -11,7 +11,7 @@ import org.scalatest.junit.JUnitRunner
 class BFSOnePieceBoardTest extends FlatSpec {
 
   "A 2x2 board" should "have 12 posibilities" in{
-    val piece = OrientablePiece.from( OrientablePiece.originalOrientable )
+    val piece = OrientableColor.originalOrientable
     val board = OnePieceBoard(2,2,piece,Location(0,0))
 
     val bfs = Board.exploreAllMovements(board)
@@ -26,7 +26,7 @@ class BFSOnePieceBoardTest extends FlatSpec {
   "A 3x3 board" should "have 108 posibilities" in{
 
 
-    val piece = OrientablePiece.from( OrientablePiece.originalOrientable )
+    val piece = OrientableColor.originalOrientable
     val board = OnePieceBoard(3,3,piece,Location(0,0))
 
     val bfs = Board.exploreAllMovements(board)
@@ -40,7 +40,7 @@ class BFSOnePieceBoardTest extends FlatSpec {
   "A 3x3 board" should "have same number of posibilities if starting from corner or edge" in{
 
 
-    val piece = OrientablePiece.from( OrientablePiece.originalOrientable )
+    val piece = OrientableColor.originalOrientable
     val cornerBoard = OnePieceBoard(3,3,piece,Location(0,0))
     val edgeBoard = OnePieceBoard(3,3,piece,Location(1,0))
 

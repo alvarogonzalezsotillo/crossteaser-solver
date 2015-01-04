@@ -119,4 +119,20 @@ class IndexedOrientableTest extends FlatSpec {
     assert( o(bottom) == oTest(bottom) )
 
   }
+
+  "An orientable" should "turn in batch" in {
+
+    for (t1 <- Turn.values; t2 <- Turn.values; t3 <- Turn.values ; t4 <- Turn.values) {
+      val o1 = oTest.turn(t1).turn(t2).turn(t3).turn(t4)
+      val o2 = oTest.someTurns(t1, t2, t3, t4)
+
+      assert(o1(top) == o2(top))
+      assert(o1(north) == o2(north))
+      assert(o1(east) == o2(east))
+      assert(o1(south) == o2(south))
+      assert(o1(west) == o2(west))
+      assert(o1(bottom) == o2(bottom))
+
+    }
+  }
 }

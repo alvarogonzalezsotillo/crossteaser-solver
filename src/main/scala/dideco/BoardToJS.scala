@@ -2,12 +2,14 @@ package dideco
 
 import java.io.PrintStream
 
+import dideco.OrientableColor.Color.Color
+
 /**
  * Created by alvaro on 7/12/14.
  */
 object BoardToJS {
 
-  def apply( b: Board[OrientablePiece], out: PrintStream ){
+  def apply( b: Board[Orientable[Color]], out: PrintStream ){
     out.println( "new Board(" )
     out.println( "  [" )
 
@@ -17,8 +19,8 @@ object BoardToJS {
         val piece = b.pieceAt(c, r)
         out.print( "      new Piece(" )
         if( piece != null ) {
-          val p = piece.orientable.
-            asSeq().
+          val p = piece.
+            asIndexedSeq().
             mkString("'", "','", "'")
           out.print( p  )
         }
@@ -32,7 +34,7 @@ object BoardToJS {
     out.println( ")")
   }
 
-  def apply( boards: Seq[Board[OrientablePiece]], out: PrintStream ) {
+  def apply( boards: Seq[Board[Orientable[Color]]], out: PrintStream ) {
     out.println("[")
     val array = boards.toArray
     for (i <- 0 until array.size) {

@@ -1,7 +1,7 @@
 package dideco
 
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import dideco.OrientablePiece.Color
+import dideco.OrientableColor.Color
 import org.junit.runner.RunWith
 import org.scalatest.FlatSpec
 import org.scalatest.junit.JUnitRunner
@@ -154,7 +154,7 @@ class CrossTeaserTest extends FlatSpec with LazyLogging{
     }
   }
 
-  "A 40 steps-scrambled CrossTeaser" should "be perfectly-colordefined-resolved in 20 steps or less" in{
+  "A 40 steps-scrambled CrossTeaser" should "be perfectly-colordefined-resolved in 40 steps or less" in{
     val p = ("Y","O")
     val board = CrossTeaser(
       p, p, p,
@@ -163,7 +163,7 @@ class CrossTeaserTest extends FlatSpec with LazyLogging{
     )
 
     repeat() {
-      val steps = 40
+      val steps = 100
       val scrambled = Board.scrambled(board, steps)
 
 

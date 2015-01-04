@@ -12,9 +12,9 @@ trait Orientable[T] extends (Orientation=>T){
   import Turn.Turn
   import Orientable._
 
-  def asSeq(): Seq[T]
+  def asIndexedSeq(): IndexedSeq[T]
 
-  def get(o:Orientation): T = asSeq()(o)
+  def get(o:Orientation): T = asIndexedSeq()(o)
 
   def apply(o:Orientation) = get(o)
 
@@ -22,38 +22,48 @@ trait Orientable[T] extends (Orientation=>T){
 
   def turn(t: Turn) : Orientable[T] = Orientable.turn(this,t)
 
-  override lazy val toString = asSeq.mkString("[",",","]")
+  def someTurns( turns: Turn* ) = turns.foldLeft(this)( (o, t) => o.turn(t) )
 
-  lazy val toShortString = asSeq.take(2).mkString("[",",","]")
+  override lazy val toString = asIndexedSeq.mkString("[",",","]")
 
+  lazy val toShortString = asIndexedSeq.take(2).mkString("[",",","]")
 
-  override lazy val hashCode  = asSeq.mkString.hashCode
+  override lazy val hashCode  = asIndexedSeq.mkString.hashCode
 
   override def equals(o:Any) = toString.equals(String.valueOf(o))
 }
 
 object Orientable{
-  class IndexedOrientable[T]( val base:Orientable[T],
-                              inTop:Orientation,
-                              inNorth:Orientation,
-                              inEast:Orientation,
-                              inSouth:Orientation,
-                              inWest:Orientation,
-                              inBottom:Orientation) extends Orientable[T] {
-
-
-    val indexArray = Array(inTop,inNorth,inEast,inSouth,inWest,inBottom)
-    val asSeq = Orientation.values.map( this )
-    
-
-    override def get(o: Orientation): T = base.get(indexArray(o))
-  }
 
   def apply[T]( inTop: T, inNorth: T, inEast: T, inSouth: T, inWest: T, inBottom: T ) : Orientable[T] ={
     new Orientable[T]{
-      val asSeq = Seq(inTop,inNorth,inEast,inSouth,inWest,inBottom)
+      val asIndexedSeq = IndexedSeq(inTop,inNorth,inEast,inSouth,inWest,inBottom)
     }
   }
+
+
+  private class IndexedOrientable[T]( val base:Orientable[T], val indexArray: Array[Orientation] ) extends Orientable[T] {
+    def asIndexedSeq = Orientation.values.map( this )
+    override def get(o: Orientation): T = base.get(indexArray(o))
+  }
+
+  private object IndexedOrientable{
+
+    private val seqCache = collection.mutable.Map[IndexedSeq[Orientation],Array[Orientation]]()
+
+    def apply[T]( base: Orientable[T],
+                  inTop: Orientation,
+                  inNorth: Orientation,
+                  inEast: Orientation,
+                  inSouth: Orientation,
+                  inWest: Orientation,
+                  inBottom: Orientation ) : IndexedOrientable[T] ={
+      val seq = IndexedSeq(inTop,inNorth,inEast,inSouth,inWest,inBottom)
+      val array = seqCache.getOrElseUpdate( seq, seq.toArray )
+      new IndexedOrientable(base,array)
+    }
+  }
+
 
   def turn[T]( o: Orientable[T], t: Turn ) : Orientable[T] = o match {
 
@@ -61,13 +71,13 @@ object Orientable{
       val ia = io.indexArray
       t match {
         case Turn.toWest =>
-          new IndexedOrientable(io.base, ia(east), ia(north), ia(bottom), ia(south), ia(top), ia(west))
+          IndexedOrientable(io.base, ia(east), ia(north), ia(bottom), ia(south), ia(top), ia(west))
         case Turn.toEast =>
-          new IndexedOrientable(io.base, ia(west), ia(north), ia(top), ia(south), ia(bottom), ia(east))
+          IndexedOrientable(io.base, ia(west), ia(north), ia(top), ia(south), ia(bottom), ia(east))
         case Turn.toNorth =>
-          new IndexedOrientable(io.base, ia(south), ia(top), ia(east), ia(bottom), ia(west), ia(north))
+          IndexedOrientable(io.base, ia(south), ia(top), ia(east), ia(bottom), ia(west), ia(north))
         case Turn.toSouth =>
-          new IndexedOrientable(io.base, ia(north), ia(bottom), ia(east), ia(top), ia(west), ia(south))
+          IndexedOrientable(io.base, ia(north), ia(bottom), ia(east), ia(top), ia(west), ia(south))
         case _ =>
           throw new IllegalArgumentException(t.toString)
       }
@@ -75,20 +85,41 @@ object Orientable{
     case or: Orientable[T] =>
       t match {
         case Turn.toWest =>
-          new IndexedOrientable(or, east, north, bottom, south, top, west)
+          IndexedOrientable(or, east, north, bottom, south, top, west)
         case Turn.toEast =>
-          new IndexedOrientable(or, west, north, top, south, bottom, east)
+          IndexedOrientable(or, west, north, top, south, bottom, east)
         case Turn.toNorth =>
-          new IndexedOrientable(or, south, top, east, bottom, west, north)
+          IndexedOrientable(or, south, top, east, bottom, west, north)
         case Turn.toSouth =>
-          new IndexedOrientable(or, north, bottom, east, top, west, south)
+          IndexedOrientable(or, north, bottom, east, top, west, south)
         case _ =>
           throw new IllegalArgumentException(t.toString)
       }
   }
 
+  def withCache[T]( o: Orientable[T] ) : (Orientable[T],Set[Orientable[T]]) = {
+
+    class CachedOrientable[T]( override val asIndexedSeq: IndexedSeq[T] ) extends Orientable[T]{
+      override def turn( t: Turn ) = turns(t)
+      val turns = new Array[Orientable[T]](Turn.values.size)
+    }
+
+    val cache = collection.mutable.Map[ IndexedSeq[T], CachedOrientable[T] ]()
+
+    def explore( co: CachedOrientable[T] ) : Unit = {
+      for( t <- Turn.values if co.turns(t) == null ){
+        val tco = Orientable.turn(co,t)
+        val seq = tco.asIndexedSeq()
+        val cachedTco = cache.getOrElseUpdate( seq, new CachedOrientable(seq) )
+        co.turns(t) = cachedTco
+        explore( cachedTco )
+      }
+    }
+
+    val root = new CachedOrientable(o.asIndexedSeq)
+    cache( root.asIndexedSeq ) = root
+    explore(root)
+
+    (root,cache.values.toSet)
+  }
 }
-
-
-
-
