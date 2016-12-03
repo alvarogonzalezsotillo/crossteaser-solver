@@ -13,7 +13,7 @@ import scala.annotation.tailrec
 @RunWith(classOf[JUnitRunner])
 class BFSBoardTest extends FlatSpec {
 
-
+  import org.scalatest.time.SpanSugar._
 
   "A 2x2 board" should "have 12 posibilities" in {
     val piece = OrientableColor.originalOrientable

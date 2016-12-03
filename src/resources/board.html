@@ -28,44 +28,362 @@
 
             function boards_interno(){
                 return [
-                    new Board(
-                        [
-                            [
-                                new Piece("R","G","O","P","Y","B"),
-                                new Piece("R","G","O","P","Y","B"),
-                                new Piece("R","G","O","P","Y","B")
-                             ],
-                            [
-                                new Piece("R","G","O","P","Y","B"),
-                                new Piece("R","G","O","P","Y","B"),
-                                new Piece("R","G","O","P","Y","B")
-                             ],
-                            [
-                                new Piece("R","G","O","P","Y","B"),
-                                new Piece("R","G","O","P","Y","B"),
-                                new Piece("R","G","O","P","Y","B")
-                             ]
-                        ]
-                     ),
-                    new Board(
-                        [
-                            [
-                                new Piece("R","G","O","P","Y","B"),
-                                new Piece("R","G","O","P","Y","B"),
-                                new Piece("R","G","O","P","Y","B")
-                             ],
-                            [
-                                new Piece("R","G","O","P","Y","B"),
-                                new Piece("R","G","O","P","Y","B"),
-                                new Piece("R","G","O","P","Y","B")
-                             ],
-                            [
-                                new Piece("R","G","O","P","Y","B"),
-                                new Piece("R","G","O","P","Y","B"),
-                                new Piece("R","G","O","P","Y","B")
-                             ]
-                        ]
-                     )
+
+
+
+
+
+new Board(
+  [
+    [
+      new Piece('Y','O','R','G','B','P'),
+      new Piece('Y','O','R','G','B','P'),
+      new Piece('Y','O','R','G','B','P')
+    ],
+    [
+      new Piece('Y','O','R','G','B','P'),
+      new Piece(),
+      new Piece('Y','O','R','G','B','P')
+    ]
+  ]
+)
+,
+new Board(
+  [
+    [
+      new Piece('Y','O','R','G','B','P'),
+      new Piece(),
+      new Piece('Y','O','R','G','B','P')
+    ],
+    [
+      new Piece('Y','O','R','G','B','P'),
+      new Piece('G','Y','R','P','B','O'),
+      new Piece('Y','O','R','G','B','P')
+    ]
+  ]
+)
+,
+new Board(
+  [
+    [
+      new Piece('Y','O','R','G','B','P'),
+      new Piece('R','O','P','G','Y','B'),
+      new Piece()
+    ],
+    [
+      new Piece(),
+      new Piece('G','Y','R','P','B','O'),
+      new Piece('Y','O','R','G','B','P')
+    ]
+  ]
+)
+,
+new Board(
+  [
+    [
+      new Piece('Y','O','R','G','B','P'),
+      new Piece('R','O','P','G','Y','B'),
+      new Piece('R','Y','O','P','G','B')
+    ],
+    [
+      new Piece('R','Y','O','P','G','B'),
+      new Piece(),
+      new Piece('Y','O','R','G','B','P')
+    ]
+  ]
+)
+,
+new Board(
+  [
+    [
+      new Piece('Y','O','R','G','B','P'),
+      new Piece(),
+      new Piece('R','Y','O','P','G','B')
+    ],
+    [
+      new Piece('R','Y','O','P','G','B'),
+      new Piece('G','R','P','B','Y','O'),
+      new Piece('Y','O','R','G','B','P')
+    ]
+  ]
+)
+,
+new Board(
+  [
+    [
+      new Piece(),
+      new Piece('B','O','Y','G','P','R'),
+      new Piece('R','Y','O','P','G','B')
+    ],
+    [
+      new Piece('R','Y','O','P','G','B'),
+      new Piece('G','R','P','B','Y','O'),
+      new Piece('Y','O','R','G','B','P')
+    ]
+  ]
+)
+,
+new Board(
+  [
+    [
+      new Piece('Y','B','O','R','G','P'),
+      new Piece('B','O','Y','G','P','R'),
+      new Piece()
+    ],
+    [
+      new Piece(),
+      new Piece('G','R','P','B','Y','O'),
+      new Piece('Y','O','R','G','B','P')
+    ]
+  ]
+)
+,
+new Board(
+  [
+    [
+      new Piece('Y','B','O','R','G','P'),
+      new Piece('B','O','Y','G','P','R'),
+      new Piece('P','R','O','B','G','Y')
+    ],
+    [
+      new Piece('P','R','O','B','G','Y'),
+      new Piece(),
+      new Piece('Y','O','R','G','B','P')
+    ]
+  ]
+)
+,
+new Board(
+  [
+    [
+      new Piece('Y','B','O','R','G','P'),
+      new Piece('B','O','Y','G','P','R'),
+      new Piece('P','R','O','B','G','Y')
+    ],
+    [
+      new Piece('P','R','O','B','G','Y'),
+      new Piece('R','O','P','G','Y','B'),
+      new Piece()
+    ]
+  ]
+)
+,
+new Board(
+  [
+    [
+      new Piece('Y','B','O','R','G','P'),
+      new Piece('B','O','Y','G','P','R'),
+      new Piece()
+    ],
+    [
+      new Piece(),
+      new Piece('R','O','P','G','Y','B'),
+      new Piece('B','P','O','Y','G','R')
+    ]
+  ]
+)
+,
+new Board(
+  [
+    [
+      new Piece('Y','B','O','R','G','P'),
+      new Piece('B','O','Y','G','P','R'),
+      new Piece('P','O','B','G','R','Y')
+    ],
+    [
+      new Piece('P','O','B','G','R','Y'),
+      new Piece(),
+      new Piece('B','P','O','Y','G','R')
+    ]
+  ]
+)
+,
+new Board(
+  [
+    [
+      new Piece('Y','B','O','R','G','P'),
+      new Piece(),
+      new Piece('P','O','B','G','R','Y')
+    ],
+    [
+      new Piece('P','O','B','G','R','Y'),
+      new Piece('G','B','Y','R','P','O'),
+      new Piece('B','P','O','Y','G','R')
+    ]
+  ]
+)
+,
+new Board(
+  [
+    [
+      new Piece(),
+      new Piece('G','B','Y','R','P','O'),
+      new Piece('P','O','B','G','R','Y')
+    ],
+    [
+      new Piece('P','O','B','G','R','Y'),
+      new Piece('G','B','Y','R','P','O'),
+      new Piece('B','P','O','Y','G','R')
+    ]
+  ]
+)
+,
+new Board(
+  [
+    [
+      new Piece('O','Y','B','P','R','G'),
+      new Piece('G','B','Y','R','P','O'),
+      new Piece()
+    ],
+    [
+      new Piece(),
+      new Piece('G','B','Y','R','P','O'),
+      new Piece('B','P','O','Y','G','R')
+    ]
+  ]
+)
+,
+new Board(
+  [
+    [
+      new Piece('O','Y','B','P','R','G'),
+      new Piece('G','B','Y','R','P','O'),
+      new Piece('Y','B','O','R','G','P')
+    ],
+    [
+      new Piece('Y','B','O','R','G','P'),
+      new Piece(),
+      new Piece('B','P','O','Y','G','R')
+    ]
+  ]
+)
+,
+new Board(
+  [
+    [
+      new Piece('O','Y','B','P','R','G'),
+      new Piece(),
+      new Piece('Y','B','O','R','G','P')
+    ],
+    [
+      new Piece('Y','B','O','R','G','P'),
+      new Piece('R','G','Y','O','P','B'),
+      new Piece('B','P','O','Y','G','R')
+    ]
+  ]
+)
+,
+new Board(
+  [
+    [
+      new Piece(),
+      new Piece('R','Y','O','P','G','B'),
+      new Piece('Y','B','O','R','G','P')
+    ],
+    [
+      new Piece('Y','B','O','R','G','P'),
+      new Piece('R','G','Y','O','P','B'),
+      new Piece('B','P','O','Y','G','R')
+    ]
+  ]
+)
+,
+new Board(
+  [
+    [
+      new Piece('B','P','O','Y','G','R'),
+      new Piece('R','Y','O','P','G','B'),
+      new Piece()
+    ],
+    [
+      new Piece(),
+      new Piece('R','G','Y','O','P','B'),
+      new Piece('B','P','O','Y','G','R')
+    ]
+  ]
+)
+,
+new Board(
+  [
+    [
+      new Piece('B','P','O','Y','G','R'),
+      new Piece(),
+      new Piece('G','Y','R','P','B','O')
+    ],
+    [
+      new Piece('G','Y','R','P','B','O'),
+      new Piece('R','G','Y','O','P','B'),
+      new Piece('B','P','O','Y','G','R')
+    ]
+  ]
+)
+,
+new Board(
+  [
+    [
+      new Piece(),
+      new Piece('G','P','B','Y','R','O'),
+      new Piece('G','Y','R','P','B','O')
+    ],
+    [
+      new Piece('G','Y','R','P','B','O'),
+      new Piece('R','G','Y','O','P','B'),
+      new Piece('B','P','O','Y','G','R')
+    ]
+  ]
+)
+,
+new Board(
+  [
+    [
+      new Piece('Y','O','R','G','B','P'),
+      new Piece('G','P','B','Y','R','O'),
+      new Piece()
+    ],
+    [
+      new Piece(),
+      new Piece('R','G','Y','O','P','B'),
+      new Piece('B','P','O','Y','G','R')
+    ]
+  ]
+)
+,
+new Board(
+  [
+    [
+      new Piece('Y','O','R','G','B','P'),
+      new Piece('G','P','B','Y','R','O'),
+      new Piece('Y','G','B','O','R','P')
+    ],
+    [
+      new Piece('Y','G','B','O','R','P'),
+      new Piece(),
+      new Piece('B','P','O','Y','G','R')
+    ]
+  ]
+)
+,
+new Board(
+  [
+    [
+      new Piece('Y','O','R','G','B','P'),
+      new Piece(),
+      new Piece('Y','G','B','O','R','P')
+    ],
+    [
+      new Piece('Y','G','B','O','R','P'),
+      new Piece('Y','G','B','O','R','P'),
+      new Piece('B','P','O','Y','G','R')
+    ]
+  ]
+)
+
+
+
+
+
+
+
                 ];
             }
 

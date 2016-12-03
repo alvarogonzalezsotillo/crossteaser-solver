@@ -108,7 +108,7 @@ class CrossTeaserTest extends FlatSpec with LazyLogging{
     val topColor = Color("Y").get
 
     repeat() {
-      val scrambled = Board.scrambled(board, 40)
+      val scrambled = Board.scrambled(board, 20)
 
       logger.error( s"Solving:$scrambled")
 
@@ -130,6 +130,7 @@ class CrossTeaserTest extends FlatSpec with LazyLogging{
   }
 
 
+
   "A 100 steps-scrambled CrossTeaser" should "be topcolor-colordefined-stepstotop--resolved in 100 steps or less" in{
     val p = ("Y","O")
     val board = CrossTeaser(
@@ -144,7 +145,9 @@ class CrossTeaserTest extends FlatSpec with LazyLogging{
 
       logger.error( s"Solving:$scrambled")
       val bfs = CrossTeaser.solveTopColor(scrambled, Color("Y").get, CrossTeaser.stepsToTop(_, Color("Y").get) )
-      val found = bfs.search()
+      val found = failOnTimeout(100000){
+        bfs.search()
+      }
 
       assert(found.isDefined)
       logger.error(""+found.get.pathToRoot.head)
@@ -154,7 +157,8 @@ class CrossTeaserTest extends FlatSpec with LazyLogging{
     }
   }
 
-  "A 40 steps-scrambled CrossTeaser" should "be perfectly-colordefined-resolved in 40 steps or less" in{
+  val stepsForPerfectlyColorDefined = 100
+  s"A $stepsForPerfectlyColorDefined steps-scrambled CrossTeaser" should s"be perfectly-colordefined-resolved in $stepsForPerfectlyColorDefined steps or less" in{
     val p = ("Y","O")
     val board = CrossTeaser(
       p, p, p,
@@ -163,17 +167,43 @@ class CrossTeaserTest extends FlatSpec with LazyLogging{
     )
 
     repeat() {
-      val steps = 100
-      val scrambled = Board.scrambled(board, steps)
-
+      val scrambled = Board.scrambled(board, stepsForPerfectlyColorDefined)
 
       logger.error( s"Solving:$scrambled")
       val bfs = CrossTeaser.solvePerfectly(scrambled, Color("Y").get, Color("O").get )
-      val found = bfs.search()
+      val found = failOnTimeout(100000){
+        bfs.search()
+      }
 
       assert(found.isDefined)
       logger.error(""+found.get.pathToRoot.head)
-      assert(found.get.pathToRoot.size <= steps+1, s"Couldn't be resolved:$scrambled" )
+      assert(found.get.pathToRoot.size <= stepsForPerfectlyColorDefined+1, s"Couldn't be resolved:$scrambled" )
+      assert(found.get.pathToRoot.last.node == scrambled)
+
+    }
+  }
+
+
+  val stepsForPerfectlyColorDefined_3x2 = 10000
+  s"A $stepsForPerfectlyColorDefined_3x2 steps-scrambled CrossTeaser" should s"be perfectly-colordefined-resolved in $stepsForPerfectlyColorDefined_3x2 steps or less" in{
+    val p = ("Y","O")
+    val board = CrossTeaser( 3, 2,
+      p, p, p,
+      p, null, p
+    )
+
+    repeat() {
+      val scrambled = Board.scrambled(board, stepsForPerfectlyColorDefined_3x2)
+
+      logger.error( s"Solving:$scrambled")
+      val bfs = CrossTeaser.solvePerfectly(scrambled, Color("Y").get, Color("O").get )
+      val found = failOnTimeout(100000){
+        bfs.search()
+      }
+
+      assert(found.isDefined)
+      logger.error(""+found.get.pathToRoot.head)
+      assert(found.get.pathToRoot.size <= stepsForPerfectlyColorDefined_3x2+1, s"Couldn't be resolved:$scrambled" )
       assert(found.get.pathToRoot.last.node == scrambled)
 
     }

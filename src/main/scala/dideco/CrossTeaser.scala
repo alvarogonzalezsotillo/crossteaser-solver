@@ -15,13 +15,15 @@ object CrossTeaser{
 
   type CrossTeaser = Board[Orientable[Color]]
 
-  implicit val boardOrdering = Ordering.by((b: CrossTeaser) => b.toString)
+  implicit val boardOrdering = Ordering.by((b: CrossTeaser) => b.toShortString)
 
-  def apply( pieces : (String,String)* ) = {
+  def apply( w: Int, h: Int, pieces : (String,String)* ) : CrossTeaser = {
     def P(sides: (String,String) ) = if( sides == null ) null else OrientableColor.from(sides._1,sides._2).head
-    assert( pieces.size == 9 )
-    Board( 3, 3, pieces.toIndexedSeq.map( P ) )
+    assert( pieces.size == w*h )
+    Board( w, h, pieces.toIndexedSeq.map( P ) )
   }
+
+  def apply( pieces : (String,String)* ) : CrossTeaser = apply(3,3,pieces:_*)
 
   def topsAreEqual( t: CrossTeaser, c: Color = null ) = {
     val pieces = t.allPieces.filter(_ != null)
@@ -64,7 +66,7 @@ object CrossTeaser{
     }
 
     val pieces = t.allPieces.filter(_ != null)
-    pieces.map( p => stepsToTop( p.where(color) ) ).sum
+    pieces.map( p => stepsToTop( p.where(color) )*2 ).sum
   }
 
   def solvePerfectly(board: CrossTeaser) = {

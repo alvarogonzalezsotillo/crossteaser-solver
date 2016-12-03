@@ -31,6 +31,10 @@ trait Board[T] {
 
   def allPieces : IndexedSeq[T] = (for( r <- 0 until rows ; c <- 0 until columns ) yield pieceAt(c,r)).toIndexedSeq
 
+  def slowCountPieces = allPieces.count( _ == true)
+
+
+
   override def toString = {
     val strings = for (r <- 0 until rows) yield {
       (for (c <- 0 until columns) yield {
@@ -63,6 +67,7 @@ trait BoardOfOrientablePieces extends Board[Orientable[Color]]{
     }
     strings.mkString("{", ",", "}")
   }
+
 }
 
 object Board extends LazyLogging {
@@ -102,6 +107,8 @@ object Board extends LazyLogging {
     BFS(board,bfsDef)
   }
 
+
+
   def apply( width: Int, height: Int, pieces : IndexedSeq[Orientable[Color]] ) : Board[Orientable[Color]] = {
     assert( pieces.size == width * height )
 
@@ -110,8 +117,10 @@ object Board extends LazyLogging {
       override val columns = width
       override val rows = height
 
-      def locationFromIndex( i: Int ) = Location(i%columns,i/rows) ensuring ( i >= 0 && i < columns*rows )
-      def indexFromLocation( column: Int, row: Int ) : Int = (column + row*rows) ensuring inside(Location(column,row))
+      def locationFromIndex( i: Int ) = Location(i%rows,i/rows) ensuring ( i >= 0 && i < columns*rows )
+      def indexFromLocation( column: Int, row: Int ) : Int = (column + row*rows) ensuring
+        inside(Location(column,row)) ensuring
+        (_ < pieces.length)
 
       def indexFromLocation( l: Location ) : Int = indexFromLocation(l.col, l.row )
 
@@ -127,7 +136,7 @@ object Board extends LazyLogging {
 
       override lazy val oneMovementBoards: Seq[Board[Orientable[Color]]] = {
         val turns = Turn.values.toArray
-        for( c <- 0 until columns ;
+        val ret = for( c <- 0 until columns ;
              r <- 0 until rows if( !free(c,r) ) ;
              location = Location(c,r) ;
              piece = pieceAt(location);
@@ -137,9 +146,14 @@ object Board extends LazyLogging {
           val newPieces = pieces.toArray.clone
           newPieces( indexFromLocation(c,r) ) = null
           newPieces( indexFromLocation(newLocation) ) = newPiece
-          apply( width, height, newPieces)
+          apply( columns, rows, newPieces)
         }
+
+
+
+        ret ensuring( ret.forall( b => b.slowCountPieces == b.columns * b.columns -1 ) )
       }
+
     }
   }
 

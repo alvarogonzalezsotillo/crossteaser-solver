@@ -27,8 +27,10 @@ object Main extends App{
   ))
 
   measure {
+    val topColor = Color("O").get
+
     val bfs = CrossTeaser.solvePerfectly(board, Color("Y").get, Color("O").get )
-    //val bfs = CrossTeaser.solveTopColor(board, Color("Y").get, CrossTeaser.stepsToTop(_, Color("Y").get) )
+    //val bfs = CrossTeaser.solveTopColor(board, topColor, CrossTeaser.stepsToTop(_, topColor) )
 
     val found = bfs.search()
 
