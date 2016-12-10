@@ -6,17 +6,14 @@ import org.junit.runner.RunWith
 import org.scalatest.FlatSpec
 import org.scalatest.junit.JUnitRunner
 
+import scala.util.Random
+
 /**
  * Created by alvaro on 29/12/14.
  */
 @RunWith(classOf[JUnitRunner])
 class CrossTeaserTest extends FlatSpec with LazyLogging{
 
-  private def repeat( times: Int = 2 )( proc : => Unit ): Unit ={
-    for( t <- 0 until times ){
-      proc
-    }
-  }
 
   "A 20 steps-scrambled CrossTeaser" should "be topcolor-resolved in 20 steps or less" in{
     val p = ("Y","O")
@@ -27,7 +24,7 @@ class CrossTeaserTest extends FlatSpec with LazyLogging{
     )
 
     repeat() {
-      val scrambled = Board.scrambled(board, 20)
+      val scrambled = Board.scrambled(board, 20)(createRandom())
 
       val bfs = CrossTeaser.solveTopColor(scrambled)
       val found = bfs.search()
@@ -48,13 +45,17 @@ class CrossTeaserTest extends FlatSpec with LazyLogging{
     )
 
     repeat() {
-      val scrambled = Board.scrambled(board, 20)
+      val scrambled = Board.scrambled(board, 20)(createRandom())
 
       val bfs = CrossTeaser.solveTopColor(scrambled)
       val found = bfs.search()
 
       val expandedNodes = bfs.expandedNodes
       val allNodes = bfs.allNodes
+
+      logger.error( s"expanddedNodes:${expandedNodes.size}  allnodes:${allNodes.size}" )
+
+      //assert( expandedNodes.size == allNodes.size )
       assert( expandedNodes.flatMap( _.children ).forall( child => allNodes.exists( child eq _ ) ) )
     }
   }
@@ -82,7 +83,7 @@ class CrossTeaserTest extends FlatSpec with LazyLogging{
     )
 
     repeat() {
-      val scrambled = Board.scrambled(board, 40)
+      val scrambled = Board.scrambled(board, 40)(createRandom())
 
 
       logger.error( s"Solving:$scrambled")
@@ -108,7 +109,7 @@ class CrossTeaserTest extends FlatSpec with LazyLogging{
     val topColor = Color("Y").get
 
     repeat() {
-      val scrambled = Board.scrambled(board, 20)
+      val scrambled = Board.scrambled(board, 20)(createRandom())
 
       logger.error( s"Solving:$scrambled")
 
@@ -140,7 +141,7 @@ class CrossTeaserTest extends FlatSpec with LazyLogging{
     )
 
     repeat() {
-      val scrambled = Board.scrambled(board, 100)
+      val scrambled = Board.scrambled(board, 100)(createRandom())
 
 
       logger.error( s"Solving:$scrambled")
@@ -167,7 +168,7 @@ class CrossTeaserTest extends FlatSpec with LazyLogging{
     )
 
     repeat() {
-      val scrambled = Board.scrambled(board, stepsForPerfectlyColorDefined)
+      val scrambled = Board.scrambled(board, stepsForPerfectlyColorDefined)(createRandom())
 
       logger.error( s"Solving:$scrambled")
       val bfs = CrossTeaser.solvePerfectly(scrambled, Color("Y").get, Color("O").get )
@@ -193,7 +194,7 @@ class CrossTeaserTest extends FlatSpec with LazyLogging{
     )
 
     repeat() {
-      val scrambled = Board.scrambled(board, stepsForPerfectlyColorDefined_3x2)
+      val scrambled = Board.scrambled(board, stepsForPerfectlyColorDefined_3x2)(createRandom())
 
       logger.error( s"Solving:$scrambled")
       val bfs = CrossTeaser.solvePerfectly(scrambled, Color("Y").get, Color("O").get )

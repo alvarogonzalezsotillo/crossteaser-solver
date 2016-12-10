@@ -3,7 +3,6 @@ package dideco
 import dideco.BFS.heuristicFunction
 import dideco.OrientableColor.Color.Color
 import dideco.Orientation.Orientation
-import dideco.Orientation._
 
 /**
  * Created by alvaro on 29/12/14.
@@ -14,8 +13,6 @@ object CrossTeaser{
   import Board.BFSBoardDefinition
 
   type CrossTeaser = Board[Orientable[Color]]
-
-  implicit val boardOrdering = Ordering.by((b: CrossTeaser) => b.toShortString)
 
   def apply( w: Int, h: Int, pieces : (String,String)* ) : CrossTeaser = {
     def P(sides: (String,String) ) = if( sides == null ) null else OrientableColor.from(sides._1,sides._2).head
@@ -69,9 +66,16 @@ object CrossTeaser{
     pieces.map( p => stepsToTop( p.where(color) )*2 ).sum
   }
 
+  private  val boardOrdering = Ordering.by((b: CrossTeaser) => b.toShortString)
+
   def solvePerfectly(board: CrossTeaser) = {
 
+
+
     val bfsDef = new BFSBoardDefinition[Orientable[Color]] {
+
+      override val ordering = boardOrdering
+
       override def found(t: CrossTeaser) = {
         topsAreEqual(t) && northsAreEqual(t)
       }
@@ -87,6 +91,8 @@ object CrossTeaser{
   def solvePerfectly(board: CrossTeaser, topColor: Color, northColor: Color ) = {
 
     val bfsDef = new BFSBoardDefinition[Orientable[Color]] {
+      override val ordering = boardOrdering
+
       override def found(t: CrossTeaser) = {
         topsAreEqual(t,topColor) && northsAreEqual(t,northColor)
       }
@@ -99,7 +105,11 @@ object CrossTeaser{
 
 
   def solveTopColor(board: CrossTeaser) = {
+
     val bfsDef = new BFSBoardDefinition[Orientable[Color]] {
+      override val ordering = boardOrdering
+
+
       override def found(t: CrossTeaser) = {
         topsAreEqual(t) && emptyInCenter(t)
       }
@@ -113,8 +123,11 @@ object CrossTeaser{
     BFS(board, bfsDef)
   }
 
+
   def solveTopColor(board: CrossTeaser, color: Color ) = {
     val bfsDef = new BFSBoardDefinition[Orientable[Color]] {
+      override val ordering = boardOrdering
+
       override def found(t: CrossTeaser) = topsAreEqual(t,color) && emptyInCenter(t)
     }
 
@@ -124,6 +137,7 @@ object CrossTeaser{
 
   def solveTopColor(board: CrossTeaser, color: Color, lowEstimateToFinal : heuristicFunction[CrossTeaser] ) = {
     val bfsDef = new BFSBoardDefinition[Orientable[Color]] {
+      override val ordering = boardOrdering
       override def found(t: CrossTeaser) = topsAreEqual(t,color) && emptyInCenter(t)
       override def heuristic(t:CrossTeaser ) =  lowEstimateToFinal(t)
     }

@@ -1,5 +1,7 @@
 package dideco
 
+import java.util
+
 import dideco.OrientableColor.Color.Color
 import org.junit.runner.RunWith
 import org.scalatest.FlatSpec
@@ -8,12 +10,12 @@ import org.scalatest.junit.JUnitRunner
 import scala.annotation.tailrec
 
 /**
- * Created by alvaro on 21/09/2014.
- */
+  * Created by alvaro on 21/09/2014.
+  */
 @RunWith(classOf[JUnitRunner])
 class BFSBoardTest extends FlatSpec {
 
-  import org.scalatest.time.SpanSugar._
+  Logging.configure()
 
   "A 2x2 board" should "have 12 posibilities" in {
     val piece = OrientableColor.originalOrientable
@@ -64,8 +66,10 @@ class BFSBoardTest extends FlatSpec {
 
 
     assert(found.isEmpty == opfound.isEmpty)
-    assert(bfs.allNodes.toSet == opbfs.allNodes.toSet)
-    assert(bfs.expandedNodes.toSet == opbfs.expandedNodes.toSet)
+    assert(bfs.allNodes.toSet.size == opbfs.allNodes.toSet.size)
+    assert(bfs.allNodes.map(_.node).toSet == opbfs.allNodes.map(_.node).toSet)
+    assert(bfs.expandedNodes.toSet.size == opbfs.expandedNodes.toSet.size)
+    assert(bfs.expandedNodes.map(_.node).toSet == opbfs.expandedNodes.map(_.node).toSet)
   }
 
   "A 3x3 board" should "have same posibilities as a one piece board" in {
@@ -80,8 +84,10 @@ class BFSBoardTest extends FlatSpec {
 
 
     assert(found.isEmpty == opfound.isEmpty)
-    assert(bfs.allNodes.toSet == opbfs.allNodes.toSet)
-    assert(bfs.expandedNodes.toSet == opbfs.expandedNodes.toSet)
+    assert(bfs.allNodes.toSet.size == opbfs.allNodes.toSet.size)
+    assert(bfs.allNodes.map(_.node).toSet == opbfs.allNodes.map(_.node).toSet)
+    assert(bfs.expandedNodes.toSet.size == opbfs.expandedNodes.toSet.size)
+    assert(bfs.expandedNodes.map(_.node).toSet == opbfs.expandedNodes.map(_.node).toSet)
   }
 
   "A 3x3 board" should "have same posibilities as a one piece board starting at a edge " in {
@@ -96,8 +102,12 @@ class BFSBoardTest extends FlatSpec {
 
 
     assert(found.isEmpty == opfound.isEmpty)
-    assert(bfs.allNodes.toSet == opbfs.allNodes.toSet)
-    assert(bfs.expandedNodes.toSet == opbfs.expandedNodes.toSet)
+    assert(bfs.allNodes.toSet.size == opbfs.allNodes.toSet.size)
+    assert(bfs.allNodes.map(_.node).toSet == opbfs.allNodes.map(_.node).toSet)
+    assert(bfs.expandedNodes.toSet.size == opbfs.expandedNodes.toSet.size)
+    assert(bfs.expandedNodes.map(_.node).toSet == opbfs.expandedNodes.map(_.node).toSet)
+
+
   }
 
 
@@ -112,82 +122,82 @@ class BFSBoardTest extends FlatSpec {
   }
 
 
-  "A 3x3 one piece board" should "be resolved in 0 movements" in{
-    val piece = OrientableColor.from( "G", "R" ).head
-    val board = Board(3,3, IndexedSeq(piece,null,null,null,null,null,null,null,null))
+  "A 3x3 one piece board" should "be resolved in 0 movements" in {
+    val piece = OrientableColor.from("G", "R").head
+    val board = Board(3, 3, IndexedSeq(piece, null, null, null, null, null, null, null, null))
     val goalB = board
 
-    val bfs = Board.explorePathTo(board,goalB)
+    val bfs = Board.explorePathTo(board, goalB)
     val found = bfs.search()
 
-    assert( found.isDefined == true )
-    assert( found.get.node == goalB )
-    assert( found.get.pathToRoot.size == 1 )
+    assert(found.isDefined == true)
+    assert(found.get.node == goalB)
+    assert(found.get.pathToRoot.size == 1)
   }
 
-  "A 3x3 one piece board" should "be resolved in 1 movement" in{
-    val piece = OrientableColor.from( "G", "R" ).head
-    val board = Board(3,3, IndexedSeq(piece,null,null,null,null,null,null,null,null))
+  "A 3x3 one piece board" should "be resolved in 1 movement" in {
+    val piece = OrientableColor.from("G", "R").head
+    val board = Board(3, 3, IndexedSeq(piece, null, null, null, null, null, null, null, null))
 
-    val goalP = OrientableColor.from( "Y", "R").head
-    val goalB = Board(3,3, IndexedSeq(null,goalP,null,null,null,null,null,null,null))
+    val goalP = OrientableColor.from("Y", "R").head
+    val goalB = Board(3, 3, IndexedSeq(null, goalP, null, null, null, null, null, null, null))
 
-    val bfs = Board.explorePathTo(board,goalB)
+    val bfs = Board.explorePathTo(board, goalB)
     val found = bfs.search()
 
-    assert( found.isDefined == true )
-    assert( found.get.node == goalB )
-    assert( found.get.pathToRoot.size == 2 )
+    assert(found.isDefined == true)
+    assert(found.get.node == goalB)
+    assert(found.get.pathToRoot.size == 2)
   }
 
-  "A 3x3 one piece board" should "be resolved in 2 movement" in{
-    val piece = OrientableColor.from( "B", "Y" ).head
-    val board = Board(3,3, IndexedSeq(piece,null,null,null,null,null,null,null,null))
+  "A 3x3 one piece board" should "be resolved in 2 movement" in {
+    val piece = OrientableColor.from("B", "Y").head
+    val board = Board(3, 3, IndexedSeq(piece, null, null, null, null, null, null, null, null))
 
-    val goalP = OrientableColor.from( "R", "P").head
-    val goalB = Board(3,3, IndexedSeq(null,null,null,null,null,null,goalP,null,null))
+    val goalP = OrientableColor.from("R", "P").head
+    val goalB = Board(3, 3, IndexedSeq(null, null, null, null, null, null, goalP, null, null))
 
-    val bfs = Board.explorePathTo(board,goalB)
+    val bfs = Board.explorePathTo(board, goalB)
     val found = bfs.search()
 
-    assert( found.isDefined == true )
-    assert( found.get.node == goalB )
-    assert( found.get.pathToRoot.size == 3 )
+    assert(found.isDefined == true)
+    assert(found.get.node == goalB)
+    assert(found.get.pathToRoot.size == 3)
   }
 
 
-  "A 3x3 one piece board" should "be resolved in 3 movement" in{
-    val piece = OrientableColor.from( "B", "Y" ).head
-    val board = Board(3,3, IndexedSeq(piece,null,null,null,null,null,null,null,null))
+  "A 3x3 one piece board" should "be resolved in 3 movement" in {
+    val piece = OrientableColor.from("B", "Y").head
+    val board = Board(3, 3, IndexedSeq(piece, null, null, null, null, null, null, null, null))
 
-    val goalP = OrientableColor.from( "O", "P").head
-    val goalB = Board(3,3, IndexedSeq(null,null,null,null,null,null,null,goalP,null))
+    val goalP = OrientableColor.from("O", "P").head
+    val goalB = Board(3, 3, IndexedSeq(null, null, null, null, null, null, null, goalP, null))
 
-    val bfs = Board.explorePathTo(board,goalB)
+    val bfs = Board.explorePathTo(board, goalB)
     val found = bfs.search()
 
-    assert( found.isDefined == true )
-    assert( found.get.node == goalB )
-    assert( found.get.pathToRoot.size == 4 )
+    assert(found.isDefined == true)
+    assert(found.get.node == goalB)
+    assert(found.get.pathToRoot.size == 4)
 
-    assert( bfs.allNodes.map(_.pathToRoot.size).forall( _ <= 4 ) )
+    assert(bfs.allNodes.map(_.pathToRoot.size).forall(_ <= 4))
   }
 
-  "A 3x3 one piece board" should "be resolved in 4 movements" in{
-    val piece = OrientableColor.from( "B", "Y" ).head
-    val board = Board(3,3, IndexedSeq(piece,null,null,null,null,null,null,null,null))
+  "A 3x3 one piece board" should "be resolved in 4 movements" in {
+    val piece = OrientableColor.from("B", "Y").head
+    val board = Board(3, 3, IndexedSeq(piece, null, null, null, null, null, null, null, null))
 
-    val goalP = OrientableColor.from( "B", "P").head
-    val goalB = Board(3,3, IndexedSeq(null,null,null,null,null,null,null,null,goalP))
+    val goalP = OrientableColor.from("B", "P").head
+    val goalB = Board(3, 3, IndexedSeq(null, null, null, null, null, null, null, null, goalP))
 
-    val bfs = Board.explorePathTo(board,goalB)
+    val bfs = Board.explorePathTo(board, goalB)
     val found = bfs.search()
 
-    assert( found.isDefined == true )
-    assert( found.get.node == goalB )
-    assert( found.get.pathToRoot.size == 5 )
+    assert(found.isDefined == true)
+    assert(found.get.node == goalB)
+    assert(found.get.pathToRoot.size == 5)
 
-    assert( bfs.allNodes.map(_.pathToRoot.size).forall( _ <= 5 ) )
+    assert(bfs.allNodes.map(_.pathToRoot.size).forall(_ <= 5))
   }
 
 }

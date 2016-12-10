@@ -20,22 +20,23 @@ trait Board[T] {
   val rows: Int
 
   def pieceAt(column: Int, row: Int): T
-  def pieceAt( l : Location ) : T = pieceAt( l.col, l.row )
-  def free( l: Location ) : Boolean = free( l.col, l.row )
-  def free(column: Int, row: Int ) : Boolean = pieceAt(column,row) == null
 
-  def locationOf(piece: T): Location
+  def pieceAt(l: Location): T = pieceAt(l.col, l.row)
 
-  def inside(l: Location) : Boolean = inside( l.col, l.row )
-  def inside(col: Int, row: Int ) = col >= 0 && col < columns && row >= 0 && row < rows
+  def free(l: Location): Boolean = free(l.col, l.row)
 
-  def allPieces : IndexedSeq[T] = (for( r <- 0 until rows ; c <- 0 until columns ) yield pieceAt(c,r)).toIndexedSeq
+  def free(column: Int, row: Int): Boolean = pieceAt(column, row) == null
 
-  def slowCountPieces = allPieces.count( _ == true)
+  def inside(l: Location): Boolean = inside(l.col, l.row)
+
+  def inside(col: Int, row: Int) = col >= 0 && col < columns && row >= 0 && row < rows
+
+  def allPieces: IndexedSeq[T] = for (r <- 0 until rows; c <- 0 until columns) yield pieceAt(c, r)
+
+  def slowCountPieces = allPieces.count(_ != null)
 
 
-
-  override def toString = {
+  override lazy val toString = {
     val strings = for (r <- 0 until rows) yield {
       (for (c <- 0 until columns) yield {
         String.valueOf(pieceAt(c, r))
@@ -47,13 +48,6 @@ trait Board[T] {
   lazy val toShortString = toString
 
   val oneMovementBoards: Seq[Board[T]]
-
-  override def equals(a: Any) = a match {
-    case b: Board[_] => b.toShortString == toShortString
-    case _ => false
-  }
-
-  override lazy val hashCode = toString.hashCode
 }
 
 
@@ -68,28 +62,38 @@ trait BoardOfOrientablePieces extends Board[Orientable[Color]]{
     strings.mkString("{", ",", "}")
   }
 
+  override def equals(o: Any) = o match{
+    case b: BoardOfOrientablePieces => b.toShortString == toShortString
+    case _ => false
+  }
+
+  override def hashCode(): Int = toShortString.hashCode()
 }
 
 object Board extends LazyLogging {
 
-  private val random = new java.util.Random()
-
   trait BFSBoardDefinition[T] extends BFS.BFSDefinition[Board[T]] {
-    override def expand(t: Board[T]) = t.oneMovementBoards
+    override def expand(t: Board[T]) = {
+      val ret = t.oneMovementBoards
+      logger.debug( s"expand: ${t.toShortString}")
+      logger.debug( "  " + ret.map(_.toShortString).mkString(" -- "))
+      ret
+    }
+
+    override def hashable(t: Board[T]) = t.toShortString
   }
 
 
   def exploreAllMovements[T]( board: Board[T] ) = {
-    implicit val boardOrdering = Ordering.by((b: Board[T]) => b.toString)
-
     val bfsDef = new BFSBoardDefinition[T] {
       override def found(t: Board[T]) = false
+      override val ordering = Ordering.by((b: Board[T]) => b.toString)
     }
 
     BFS(board,bfsDef)
   }
 
-  def scrambled[T](board: Board[T], steps: Int) : Board[T] = steps match{
+  def scrambled[T](board: Board[T], steps: Int)(implicit random: Random) : Board[T] = steps match{
     case n if n <= 0 => board
     case n =>
       val posibleSteps = board.oneMovementBoards
@@ -99,10 +103,10 @@ object Board extends LazyLogging {
 
 
   def explorePathTo[T]( board: Board[T], goal: Board[T] ) = {
-    implicit val boardOrdering = Ordering.by((b: Board[T]) => b.toString)
-
     val bfsDef = new BFSBoardDefinition[T] {
       override def found(t: Board[T]) =  t == goal
+
+      override val ordering = Ordering.by((b: Board[T]) => b.toString)
     }
     BFS(board,bfsDef)
   }
@@ -117,8 +121,8 @@ object Board extends LazyLogging {
       override val columns = width
       override val rows = height
 
-      def locationFromIndex( i: Int ) = Location(i%rows,i/rows) ensuring ( i >= 0 && i < columns*rows )
-      def indexFromLocation( column: Int, row: Int ) : Int = (column + row*rows) ensuring
+      def locationFromIndex( i: Int ) = Location(i%columns,i/columns) ensuring ( i >= 0 && i < columns*rows )
+      def indexFromLocation( column: Int, row: Int ) : Int = (column + row*columns) ensuring
         inside(Location(column,row)) ensuring
         (_ < pieces.length)
 
@@ -128,13 +132,10 @@ object Board extends LazyLogging {
 
       override val allPieces : IndexedSeq[Orientable[Color]] = pieces
 
-      override def locationOf(piece: Orientable[Color]): Location = pieces.indexOf(piece) match{
-        case -1 =>  null
-        case i  => locationFromIndex(i)
-      }
 
 
       override lazy val oneMovementBoards: Seq[Board[Orientable[Color]]] = {
+
         val turns = Turn.values.toArray
         val ret = for( c <- 0 until columns ;
              r <- 0 until rows if( !free(c,r) ) ;
@@ -146,12 +147,14 @@ object Board extends LazyLogging {
           val newPieces = pieces.toArray.clone
           newPieces( indexFromLocation(c,r) ) = null
           newPieces( indexFromLocation(newLocation) ) = newPiece
-          apply( columns, rows, newPieces)
+
+          val newBoard = Board( columns, rows, newPieces)
+          newBoard
         }
 
 
 
-        ret ensuring( ret.forall( b => b.slowCountPieces == b.columns * b.columns -1 ) )
+        ret
       }
 
     }
@@ -170,10 +173,8 @@ object OnePieceBoard extends LazyLogging {
       override val columns: Int = width
       override val rows: Int = height
 
-      def locationOf(p: Orientable[Color]) = if (p == piece) location else null
-
-      def pieceAt(column: Int, row: Int) = {
-        if (location._1 == column && location._2 == row)
+        def pieceAt(column: Int, row: Int) = {
+        if (location.col == column && location.row == row)
           piece
         else
           null

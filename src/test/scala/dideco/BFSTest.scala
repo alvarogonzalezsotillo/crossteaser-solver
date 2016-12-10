@@ -15,12 +15,31 @@ class BFSTest extends FlatSpec {
 
   def noEstimate[T](n: T) = 0L
 
+  def bfsDefinition[T](expandF: (T) => Seq[T], equalF: (T, T) => Boolean, foundF: (T) => Boolean, heuristicF: (T) => Long, ord: Ordering[T]) = {
+    new BFSDefinition[T]{
+      override def equal(a: T, b: T): Boolean = equalF(a,b)
+
+      override def expand(t: T) = expandF(t)
+
+      override def found(t: T) = foundF(t)
+
+      override def heuristic(t: T) = heuristicF(t)
+
+      override val ordering = ord
+
+      override def hashable(t: T) = t.toString
+    }
+
+  }
+
   "A node with no children" should "have an empty search tree" in {
 
     val node = 1
     val expandF = (_: Int) => Seq[Int]()
 
-    val bfs = BFS[Int](node, expandF, compareF[Int] _, notFoundF[Int] _, noEstimate[Int] _)
+    val definition = bfsDefinition(expandF, compareF[Int] _, notFoundF[Int] _, noEstimate[Int] _, implicitly[Ordering[Int]])
+
+    val bfs = BFS[Int](node, definition )
 
     assert(bfs.search().isEmpty)
   }
@@ -30,7 +49,9 @@ class BFSTest extends FlatSpec {
     val expandF = (i: Int) => Seq(i - 1)
     val foundF = (i: Int) => i == 1
 
-    val bfs = BFS(node, expandF, compareF[Int] _ , foundF, noEstimate[Int] _)
+    val definition = bfsDefinition( expandF, compareF[Int] _ , foundF, noEstimate[Int] _, implicitly[Ordering[Int]])
+
+    val bfs = BFS(node, definition)
 
     val res = bfs.search()
     assert(res.isDefined)
@@ -43,6 +64,10 @@ class BFSTest extends FlatSpec {
     val definition = new BFSDefinition[String]{
       def expand( t: String ) = Seq( t + "a", t + "b" )
       def found( t:String ) = t == "abab"
+
+      override val ordering: Ordering[String] = implicitly[Ordering[String]]
+
+      override def hashable(t: String) = t
     }
 
     val bfs = BFS( node, definition )
@@ -61,6 +86,10 @@ class BFSTest extends FlatSpec {
       else
         Seq( t + "a", t + "b" )
       def found( t:String ) = t == "abab"
+
+      override def ordering: Ordering[String] = implicitly[Ordering[String]]
+
+      override def hashable(t: String) = t
     }
 
     val bfs = BFS( node, definition )
