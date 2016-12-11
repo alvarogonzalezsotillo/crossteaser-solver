@@ -113,7 +113,7 @@ class CrossTeaserTest extends FlatSpec with LazyLogging{
 
       logger.error( s"Solving:$scrambled")
 
-      val bfsH = CrossTeaser.solveTopColor(scrambled, topColor, CrossTeaser.stepsToTop(_, topColor) )
+      val bfsH = CrossTeaser.solveTopColor(scrambled, topColor)
       val foundH = bfsH.search()
       logger.error("foundH"+foundH.get.pathToRoot.head)
       logger.error( s"bfsH:$bfsH")

@@ -18,16 +18,16 @@ object Main extends App{
   }
 
 
-  def P( sides : String* ) = OrientableColor.from(sides:_*).head
+
   val Array(y,o,g,b,r,p) = Array("Y","O","G","B","R","P")
 
   println( OrientableColor.allPieces.map(_.toShortString).mkString("\n") )
 
 
-  val board = Board( 3, 2, IndexedSeq(
-    P(y,b),    P(y,b),    P(r,g),
-    P(p,g),    null,    P(r,g)
-  ))
+  val board = CrossTeaser( 3, 2,
+    (y,b),(y,b),(r,g),
+    (p,g),null,(r,g)
+  )
 
   Logging.configure()
 
@@ -35,7 +35,7 @@ object Main extends App{
     val topColor = Color(o).get
 
     //val bfs = CrossTeaser.solvePerfectly(board, Color("Y").get, Color("O").get )
-    val bfs = CrossTeaser.solveTopColor(board, topColor, CrossTeaser.stepsToTop(_, topColor) )
+    val bfs = CrossTeaser.solveTopColor(board, topColor )
 
     val found = bfs.search()
 
