@@ -18,7 +18,23 @@ trait Orientable[T] extends (Orientation=>T){
 
   def apply(o:Orientation) = get(o)
 
-  def where(t:T) = Orientation.values.find( get(_) == t ).get
+  def where(t:T): Orientation = {
+    // FUNCTIONAL AND SLOW
+    def slow() = Orientation.values.find( get(_) == t ).get
+
+    def fast() : Orientation = {
+      var o = Orientation.first
+      while (o <= Orientation.last) {
+        if (asIndexedSeq()(o) == t) {
+          return o
+        }
+        o += 1
+      }
+      throw new IllegalStateException()
+    }
+
+    fast
+  }
 
   def turn(t: Turn) : Orientable[T] = Orientable.turn(this,t)
 
@@ -43,7 +59,7 @@ object Orientable{
 
 
   private class IndexedOrientable[T]( val base:Orientable[T], val indexArray: Array[Orientation] ) extends Orientable[T] {
-    def asIndexedSeq = Orientation.values.map( this )
+    lazy val asIndexedSeq = Orientation.values.map( this )
     override def get(o: Orientation): T = base.get(indexArray(o))
   }
 

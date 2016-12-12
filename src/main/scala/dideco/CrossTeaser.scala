@@ -62,8 +62,25 @@ object CrossTeaser {
       case _ => throw new IllegalStateException();
     }
 
-    val pieces = t.allPieces.filter(_ != null)
-    pieces.map(p => stepsToTop(p.where(color)) * 2).sum
+    def functionalAndSlow = {
+      val pieces = t.allPieces.filter(_ != null)
+      pieces.map(p => stepsToTop(p.where(color)) * 2).sum
+    }
+
+    def fast = {
+      var sum = 0
+      val pieces = t.allPieces
+      var i = 0
+      while( i < pieces.size ){
+        if( pieces(i) != null ){
+          sum += stepsToTop( pieces(i).where(color) )
+        }
+        i += 1
+      }
+      sum
+    }
+
+    fast
   }
 
   private val boardOrdering = Ordering.by((b: CrossTeaser) => b.toShortString)

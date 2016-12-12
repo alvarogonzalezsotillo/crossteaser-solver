@@ -13,4 +13,7 @@ object Orientation{
   val bottom:Orientation = 5
 
   val values = Array(top,north,east,south,west,bottom)
+
+  val first = top
+  val last = bottom
 }

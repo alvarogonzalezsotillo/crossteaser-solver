@@ -31,7 +31,7 @@ trait BFSNode[T]{
 trait BFS[T]{
 
 
-  def search( limit: Int = -1 ) : Option[BFSNode[T]]
+  def search( msLimit: Int = -1 , nodesLimit: Int = -1 ) : Option[BFSNode[T]]
   def expandedNodes : Seq[BFSNode[T]]
   def nodesToExpand : Seq[BFSNode[T]]
   def allNodes : Seq[BFSNode[T]]
@@ -172,15 +172,25 @@ object BFS extends LazyLogging{
       }
     }
 
-    def search(limit: Int): Option[BFSNode[T]] = {
+    def search(msLimit: Int = -1, nodesLimit: Int = -1): Option[BFSNode[T]] = {
+
+
+
+      val initMS = System.currentTimeMillis()
 
       @tailrec
       def search_tailrec(limit: Int) : Option[BFSNode[T]] = {
 
         if( limit % 1000 == 0 ) logger.info( s"limit $limit" )
 
-        if (limit == 0)
+        if( msLimit != -1 && (initMS + msLimit < System.currentTimeMillis()) ) {
+          logger.warn("search: timeout")
           None
+        }
+        else if (limit == 0) {
+          logger.warn("search: node limit")
+          None
+        }
         else nextNodeToExpand match {
           case Some(next) =>
 
@@ -197,7 +207,7 @@ object BFS extends LazyLogging{
         }
       }
 
-      search_tailrec(limit)
+      search_tailrec(nodesLimit)
     }
 
   }

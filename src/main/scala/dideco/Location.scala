@@ -16,14 +16,14 @@ object Location{
   implicit def toLocation( p: (Int,Int) ) = new Location(p._1,p._2)
   implicit def toPair( l: Location ) = (l.col,l.row)
 
-  private val cache = collection.mutable.Map[Int,collection.mutable.Map[Int,Location]]()
-
-  private def getFromCache( col:Int, row: Int ) = {
-    val level1 = cache.getOrElseUpdate( col, collection.mutable.Map[Int,Location]() )
-    level1.getOrElseUpdate( row, new Location(col,row) )
+  private val cols = 100
+  private val rows = 100
+  private val cache = Array.tabulate(cols,rows){ (c, r) =>
+    new Location(c-cols/2,r-rows/2)
   }
 
-  def apply( col:Int, row: Int) = getFromCache(col, row )
+
+  def apply( col:Int, row: Int) = cache(col+cols/2)(row+rows/2)
 }
 
 class Location( val col:Int, val row:Int ){

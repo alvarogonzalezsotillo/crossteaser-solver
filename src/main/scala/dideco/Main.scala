@@ -1,5 +1,7 @@
 package dideco
 
+import java.util.Scanner
+
 import dideco.OrientableColor.Color
 import dideco.OrientableColor.Color
 import dideco.OrientableColor.Color.Color
@@ -30,6 +32,13 @@ object Main extends App{
   )
 
   Logging.configure()
+
+  def waitForProfiler() = {
+    println( "Intro para seguir..." )
+    new Scanner(System.in).nextLine()
+  }
+
+  waitForProfiler()
 
   measure {
     val topColor = Color(o).get
