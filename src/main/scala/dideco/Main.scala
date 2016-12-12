@@ -35,7 +35,7 @@ object Main extends App{
 
   def waitForProfiler() = {
     println( "Intro para seguir..." )
-    new Scanner(System.in).nextLine()
+    util.Try(new Scanner(System.in).nextLine())
   }
 
   waitForProfiler()
