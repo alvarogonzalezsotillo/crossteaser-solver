@@ -183,7 +183,8 @@ object BFS extends LazyLogging{
 
         if( limit % 10000 == 0 ) {
           val r = Runtime.getRuntime
-          logger.info( s"limit $limit  maxMemory:${r.maxMemory()}  totalMemory:${r.totalMemory()}  freeMemory:${r.freeMemory()}" )
+          logger.info( s"limit $limit\n\tmaxMemory:  \t${r.maxMemory()}\n\ttotalMemory:\t${r.totalMemory()}\n\tfreeMemory: \t${r.freeMemory()}" )
+
         }
 
         if( msLimit != -1 && (initMS + msLimit < System.currentTimeMillis()) ) {
