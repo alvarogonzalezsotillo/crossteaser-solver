@@ -181,7 +181,10 @@ object BFS extends LazyLogging{
       @tailrec
       def search_tailrec(limit: Int) : Option[BFSNode[T]] = {
 
-        if( limit % 1000 == 0 ) logger.info( s"limit $limit" )
+        if( limit % 10000 == 0 ) {
+          val r = Runtime.getRuntime
+          logger.info( s"limit $limit  maxMemory:${r.maxMemory()}  totalMemory:${r.totalMemory()}  freeMemory:${r.freeMemory()}" )
+        }
 
         if( msLimit != -1 && (initMS + msLimit < System.currentTimeMillis()) ) {
           logger.warn("search: timeout")

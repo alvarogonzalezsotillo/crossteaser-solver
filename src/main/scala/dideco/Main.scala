@@ -1,5 +1,6 @@
 package dideco
 
+import java.io.{FileOutputStream, PrintStream}
 import java.util.Scanner
 
 import dideco.OrientableColor.Color
@@ -26,10 +27,20 @@ object Main extends App{
   println( OrientableColor.allPieces.map(_.toShortString).mkString("\n") )
 
 
-  val board = CrossTeaser( 3, 2,
-    (y,b),(y,b),(r,g),
-    (p,g),null,(r,g)
+
+  val board1 = CrossTeaser( 3, 3,
+    (y,o),(g,b),(r,p),
+    (o,b), (b,o), (p,o),
+    null, (r,y), (o,r)
   )
+
+  val board2 = CrossTeaser( 3, 3,
+    null, (p,b), (g,p),
+    (o,b), (r,y), (o,p),
+    (o,y), (o,b), (o,y)
+  )
+  //val board = CrossTeaser.rotate180(board1)
+  val board = board2
 
   Logging.configure()
 
@@ -43,16 +54,28 @@ object Main extends App{
   measure {
     val topColor = Color(o).get
 
-    //val bfs = CrossTeaser.solvePerfectly(board, Color("Y").get, Color("O").get )
-    val bfs = CrossTeaser.solveTopColor(board, topColor )
+    def simpleSolution = {
 
-    val found = bfs.search()
+      //val bfs = CrossTeaser.solvePerfectly(board, Color("Y").get, Color("O").get )
+      val bfs = CrossTeaser.solveTopColor(board, topColor)
 
-    val solution = found.get.pathToRoot
+
+      val found = bfs.search()
+
+      found.get.pathToRoot.map(_.node)
+    }
+
+    def complexSolution = {
+      CrossTeaser.solutionInHalfs(board,topColor)
+    }
+
+    println( board )
+    val solution = complexSolution
 
     println(solution)
 
-    BoardToJS(solution.map(_.node), System.out)
+    BoardToJS(solution, System.out)
+    BoardToJS(solution, new PrintStream( new FileOutputStream("solution.json") ))
   }
 
 }
