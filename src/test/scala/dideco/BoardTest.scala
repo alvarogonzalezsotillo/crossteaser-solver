@@ -17,7 +17,7 @@ class BoardTest extends FlatSpec {
     val piece = OrientableColor.originalOrientable
 
     val board1 = OnePieceBoard(2,2,piece,Location(0,0))
-    val board2 = Board(2,2, IndexedSeq(piece,null,null,null) )
+    val board2 = Board(2,2, Array(piece,null,null,null) )
 
     val b1 = board1.oneMovementBoards.toSet
     val b2 = board2.oneMovementBoards.toSet

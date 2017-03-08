@@ -40,9 +40,9 @@ trait Orientable[T] extends (Orientation=>T){
 
   def someTurns( turns: Turn* ) = turns.foldLeft(this)( (o, t) => o.turn(t) )
 
-  override lazy val toString = asIndexedSeq.mkString("[",",","]")
+  override def toString = asIndexedSeq.mkString("[",",","]")
 
-  lazy val toShortString = asIndexedSeq.take(2).mkString("[",",","]")
+  def toShortString = asIndexedSeq.take(2).mkString("")
 
   override lazy val hashCode  = asIndexedSeq.mkString.hashCode
 

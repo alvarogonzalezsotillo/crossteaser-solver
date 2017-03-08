@@ -19,14 +19,14 @@ object CrossTeaser extends LazyLogging{
     val pieces = for( r <- board.rows-1 to 0 by -1 ; c <- board.columns-1 to 0 by -1 ) yield board.pieceAt(c,r)
     logger.warn( board.allPieces.mkString(",") )
     logger.warn( pieces.mkString(",") )
-    Board(board.columns,board.rows,pieces)
+    Board(board.columns,board.rows,pieces.toArray)
   }
 
   def apply(w: Int, h: Int, pieces: (String, String)*): CrossTeaser = {
     def P(sides: (String, String)) = if (sides == null) null else OrientableColor.from(sides._1, sides._2).head
 
     assert(pieces.size == w * h)
-    Board(w, h, pieces.toIndexedSeq.map(P))
+    Board(w, h, pieces.toIndexedSeq.map(P).toArray)
   }
 
   def apply(pieces: (String, String)*): CrossTeaser = apply(3, 3, pieces: _*)
@@ -183,7 +183,7 @@ object CrossTeaser extends LazyLogging{
 
     val firstHalfPieces = for ( r <- 0 until 2; c <- 0 until 3) yield board.pieceAt(c, r)
     logger.warn( "firstHalfPieces:" + firstHalfPieces )
-    val firstHalf = Board(3, 2, firstHalfPieces)
+    val firstHalf = Board(3, 2, firstHalfPieces.toArray)
 
     val firstDefinition = new BFSBoardDefinition[Orientable[Color]] {
       override val ordering = boardOrdering
@@ -199,7 +199,7 @@ object CrossTeaser extends LazyLogging{
       (for (r <- 1 until 2;c <- 0 until 3) yield firstSolution.node.pieceAt(c, r)) ++
         (for (r <- 2 until 3;c <- 0 until 3) yield board.pieceAt(c, r))
     }
-    val secondHalf = Board( 3, 2, secondHalfPieces)
+    val secondHalf = Board( 3, 2, secondHalfPieces.toArray)
     logger.warn( "secondHalf:" + secondHalf.toShortString )
 
     val secondDefinition= new BFSBoardDefinition[Orientable[Color]] {
@@ -212,12 +212,57 @@ object CrossTeaser extends LazyLogging{
     val secondSolution = secondBFS.search().get
 
     val lastRowOfBoard = for(c <- 0 until 3) yield board.pieceAt(c,2)
-    val firstSeq = firstSolution.pathToRoot.map(_.node).map( t => Board(3,3,t.allPieces ++ lastRowOfBoard))
+    val firstSeq = firstSolution.pathToRoot.map(_.node).map( t => Board(3,3,(t.allPieces ++ lastRowOfBoard).toArray))
     val firstRowOfBoard = for( c <- 0 until 3 ) yield firstSolution.pathToRoot.head.node.pieceAt(c,0)
-    val secondSeq = secondSolution.pathToRoot.map(_.node).map( t => Board(3,3, firstRowOfBoard ++ t.allPieces))
+    val secondSeq = secondSolution.pathToRoot.map(_.node).map( t => Board(3,3, (firstRowOfBoard ++ t.allPieces).toArray))
 
     secondSeq ++ firstSeq
   }
 
+  def solutionInHalfs(board: CrossTeaser, topColor: Color, northColor: Color ) = {
+
+    logger.warn( "board:" + board.toShortString )
+
+    assert(board.columns == 3)
+    assert(board.rows == 3)
+    val h : heuristicFunction[Board[Orientable[Color]]] = stepsToTop(_, topColor)
+
+    val firstHalfPieces = for ( r <- 0 until 2; c <- 0 until 3) yield board.pieceAt(c, r)
+    logger.warn( "firstHalfPieces:" + firstHalfPieces )
+    val firstHalf = Board(3, 2, firstHalfPieces.toArray)
+
+    val firstDefinition = new BFSBoardDefinition[Orientable[Color]] {
+      override val ordering = boardOrdering
+      override def found(t: Board[Orientable[Color]]): Boolean = topsAreEqual(t, topColor) && northsAreEqual(t,northColor) && emptyInRow(t, 1)
+      override def heuristic(t: CrossTeaser) = h(t)
+    }
+
+    logger.warn( "firstHalf:" + firstHalf.toShortString )
+    val firstBFS = BFS(firstHalf, firstDefinition)
+    val firstSolution = firstBFS.search().get
+
+    val secondHalfPieces = {
+      (for (r <- 1 until 2;c <- 0 until 3) yield firstSolution.node.pieceAt(c, r)) ++
+        (for (r <- 2 until 3;c <- 0 until 3) yield board.pieceAt(c, r))
+    }
+    val secondHalf = Board( 3, 2, secondHalfPieces.toArray)
+    logger.warn( "secondHalf:" + secondHalf.toShortString )
+
+    val secondDefinition= new BFSBoardDefinition[Orientable[Color]] {
+      override val ordering = boardOrdering
+      override def found(t: Board[Orientable[Color]]): Boolean = topsAreEqual(t, topColor)  && northsAreEqual(t,northColor) && emptyInRow(t,0) && emptyInColumn(t,1)
+      override def heuristic(t: CrossTeaser) = h(t)
+    }
+
+    val secondBFS = BFS(secondHalf,secondDefinition)
+    val secondSolution = secondBFS.search().get
+
+    val lastRowOfBoard = for(c <- 0 until 3) yield board.pieceAt(c,2)
+    val firstSeq = firstSolution.pathToRoot.map(_.node).map( t => Board(3,3,(t.allPieces ++ lastRowOfBoard).toArray))
+    val firstRowOfBoard = for( c <- 0 until 3 ) yield firstSolution.pathToRoot.head.node.pieceAt(c,0)
+    val secondSeq = secondSolution.pathToRoot.map(_.node).map( t => Board(3,3, (firstRowOfBoard ++ t.allPieces).toArray))
+
+    secondSeq ++ firstSeq
+  }
 
 }
