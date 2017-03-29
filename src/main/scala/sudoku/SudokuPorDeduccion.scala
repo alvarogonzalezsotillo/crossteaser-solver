@@ -1,7 +1,5 @@
 package sudoku
 
-import collection.mutable.{Set => MSet}
-
 /**
   * Created by alvaro on 4/03/17.
   */
@@ -17,45 +15,45 @@ class SudokuPorDeduccion {
   type Numero = Int
 
   trait Dominio {
-    protected val imposible = new Array[Boolean](9)
+    var posibles = scala.collection.mutable.Set[Numero]()
 
-    def posible(n: Numero) = !imposible(n - 1)
+    def posible(n: Numero) = posibles.contains(n)
 
     def definido = cardinalidad == 1
 
     def vacio = cardinalidad == 0
 
-    def cardinalidad = imposible.count(_ == false)
+    def cardinalidad = posibles.size
 
-    def toSet = (1 to 9).filter(posible).toSet
+    def toSet : Set[Int] = Set[Int](posibles.toSeq: _*)
 
     def valor = definido match {
-      case true => (0 until 9).find(n => imposible(n) == false).map(_ + 1)
+      case true => Some(posibles.head)
       case false => None
     }
 
     override def toString() = {
-      imposible.indices.map(i => if( imposible(i) ) "_" else (i+1).toString ).mkString(",")
+      (1 to 9).map(i => if( !posible(i) ) "_" else i.toString ).mkString(",")
     }
   }
 
   class DominioDecreciente extends Dominio {
 
-    def marcaComoImposibles(s: Iterable[Numero]) = s.foreach(marcaComoImposible(_))
 
-    def marcaComoImposible(n: Numero*) = n.foreach(i => imposible(i - 1) = true)
+    (1 to 9).foreach( posibles += _ )
+
+    def marcaComoImposibles(s: Iterable[Numero]) = posibles --= s
+
+    def marcaComoImposible(n: Numero*) = marcaComoImposibles(n)
 
     def marcaComoValor(n: Numero) = marcaComoImposible((1 to 9).filter(_ != n): _*)
   }
 
   class DominioCreciente extends Dominio {
-    imposible.indices.foreach(imposible(_) = true)
 
-    def marcaComoPosible(n: Numero*) = n.foreach(i => imposible(i - 1) = false)
+    def marcaComoPosible(n: Numero*) = posibles ++= n
 
-    def ++=(d: Dominio) = {
-      for (n <- 1 to 9 if (d.posible(n))) marcaComoPosible(n)
-    }
+    def ++=(d: Dominio) = posibles ++= d.toSet
   }
 
   class Grupo(val nombre: String, val celdas: Seq[Celda]){
@@ -63,6 +61,7 @@ class SudokuPorDeduccion {
   }
 
   class Celda(val fila:Int, val columna:Int) {
+    import scala.collection.mutable.{Set=>MSet}
     val grupos = MSet[Grupo]()
     val dominio = new DominioDecreciente()
     override def toString() = dominio.toString
@@ -170,7 +169,7 @@ class SudokuPorDeduccion {
 
   def reduceDominioPorCircunscripcionOculta( size: Int, g: Grupo ) : Boolean = {
     var ret = false
-    val subconjuntos = g.celdas.foldLeft(Set[Set[Int]]()){ (s,c) =>
+    val subconjuntos = g.celdas.foldLeft(Set[Set[Int]]()){ (s:Set[Set[Int]],c) =>
       s ++ c.dominio.toSet.subsets(size)
     }
     log( s"size:$size grupo:${g.nombre} subconjuntos:$subconjuntos")

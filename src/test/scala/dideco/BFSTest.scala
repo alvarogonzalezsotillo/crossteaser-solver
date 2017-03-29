@@ -15,7 +15,7 @@ class BFSTest extends FlatSpec {
 
   def noEstimate[T](n: T) = 0L
 
-  def bfsDefinition[T](expandF: (T) => Seq[T], equalF: (T, T) => Boolean, foundF: (T) => Boolean, heuristicF: (T) => Long, ord: Ordering[T]) = {
+  def bfsDefinition[T](expandF: (T) => Seq[(T,BFSOperation[T])], equalF: (T, T) => Boolean, foundF: (T) => Boolean, heuristicF: (T) => Long, ord: Ordering[T]) = {
     new BFSDefinition[T]{
       override def equal(a: T, b: T): Boolean = equalF(a,b)
 
@@ -35,7 +35,7 @@ class BFSTest extends FlatSpec {
   "A node with no children" should "have an empty search tree" in {
 
     val node = 1
-    val expandF = (_: Int) => Seq[Int]()
+    val expandF = (_: Int) => Seq[(Int,BFSOperation[Int])]()
 
     val definition = bfsDefinition(expandF, compareF[Int] _, notFoundF[Int] _, noEstimate[Int] _, implicitly[Ordering[Int]])
 
@@ -46,7 +46,7 @@ class BFSTest extends FlatSpec {
 
   "From 100 to 1" should "be 100 nodes" in {
     val node = 100
-    val expandF = (i: Int) => Seq(i - 1)
+    val expandF = (i: Int) => Seq((i - 1,null))
     val foundF = (i: Int) => i == 1
 
     val definition = bfsDefinition( expandF, compareF[Int] _ , foundF, noEstimate[Int] _, implicitly[Ordering[Int]])
@@ -62,7 +62,7 @@ class BFSTest extends FlatSpec {
   "abab" should "be generated in five levels" in{
     val node = ""
     val definition = new BFSDefinition[String]{
-      def expand( t: String ) = Seq( t + "a", t + "b" )
+      def expand( t: String ) = Seq( (t + "a",null), (t + "b",null) )
       def found( t:String ) = t == "abab"
 
       override val ordering: Ordering[String] = implicitly[Ordering[String]]
@@ -81,10 +81,14 @@ class BFSTest extends FlatSpec {
   "abab" should "be generated without duplicated nodes" in{
     val node = ""
     val definition = new BFSDefinition[String]{
-      def expand( t: String ) = if( t.size > 0 )
-        Seq( t.slice(0,t.size-2), t + "a", t + "b" )
-      else
-        Seq( t + "a", t + "b" )
+      def expand( t: String ) = {
+        val ret = if( t.size > 0 )
+          Seq( t.slice(0,t.size-2), t + "a", t + "b" )
+        else
+          Seq( t + "a", t + "b" )
+
+        ret.map( (_,null) )
+      }
       def found( t:String ) = t == "abab"
 
       override def ordering: Ordering[String] = implicitly[Ordering[String]]

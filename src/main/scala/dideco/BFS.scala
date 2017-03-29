@@ -10,11 +10,15 @@ import scala.annotation.tailrec
  */
 
 
+trait BFSOperation[T]
+
 
 trait BFSNode[T]{
+
   def node : T
   def depth : Long
   def parent : BFSNode[T]
+  def operationFromParent : BFSOperation[T]
   def children : Seq[BFSNode[T]]
   def pathToRoot : Seq[BFSNode[T]] = {
 
@@ -54,8 +58,9 @@ object BFS extends LazyLogging{
   type heuristicFunction[T] = (T) => Long
 
 
+
   trait BFSDefinition[T]{
-    def expand( t:T ) : Seq[T]
+    def expand( t:T ) : Seq[(T,BFSOperation[T])]
     def equal(a:T,b:T) = ordering.equiv(a,b)
     def ordering: Ordering[T]
     def found( t:T ) : Boolean
@@ -87,14 +92,14 @@ object BFS extends LazyLogging{
     val _expandedNodes = collection.mutable.Set[BFSNode[T]]()
     val _allNodes = collection.mutable.Map[AnyRef, BFSNode[T]]()
 
-    _nodesToExpand += getOrCreateNode(0, null)(initial)
+    _nodesToExpand += getOrCreateNode(0, null)(initial,null)
 
 
     override def expandedNodes = _expandedNodes.toSeq
     override def nodesToExpand = _nodesToExpand.toSeq
     override def allNodes = _allNodes.values.toSeq
 
-    class BFSNodeImpl(val node: T, val depth: Long, val parent: BFSNode[T]) extends BFSNode[T] {
+    class BFSNodeImpl(val node: T, val depth: Long, val parent: BFSNode[T], val operationFromParent: BFSOperation[T] ) extends BFSNode[T] {
 
       override val toString = node.toString
 
@@ -103,8 +108,8 @@ object BFS extends LazyLogging{
 
       def computeChildren: Seq[BFSNode[T]] = {
         definition.expand(node).
-          filter(!definition.equal(_, node)).
-          map(getOrCreateNode(depth + 1, this))
+          filter( p => !definition.equal(p._1, node)).
+          map( p=> getOrCreateNode(depth + 1, this)(p._1,p._2))
       }
 
       override def equals(o: Any): Boolean = o match{
@@ -114,12 +119,12 @@ object BFS extends LazyLogging{
     }
 
 
-    def getOrCreateNode(depth: Long, parent: BFSNode[T])(n: T): BFSNode[T] = {
+    def getOrCreateNode(depth: Long, parent: BFSNode[T])(n: T, o: BFSOperation[T] ): BFSNode[T] = {
       val h = definition.hashable(n)
       val ret = _allNodes.get(h) match{
         case None =>
           logger.debug( "getOrCreateNode:  creando nuevo nodo para " + n.toString )
-          val node = new BFSNodeImpl(n, depth, parent)
+          val node = new BFSNodeImpl(n, depth, parent, o )
           _allNodes(h) = node
           node
 

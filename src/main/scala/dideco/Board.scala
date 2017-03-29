@@ -77,12 +77,14 @@ trait BoardOfOrientablePieces extends Board[Orientable[Color]] {
 
 object Board extends LazyLogging {
 
+  case class BFSBoardOperation[T](board: Board[T] ) extends BFSOperation[Board[T]]
+
   trait BFSBoardDefinition[T] extends BFS.BFSDefinition[Board[T]] {
     override def expand(t: Board[T]) = {
       val ret = t.oneMovementBoards
       logger.debug(s"expand: ${t.toShortString}")
       logger.debug("  " + ret.map(_.toShortString).mkString(" -- "))
-      ret
+      ret.map( b => (b,BFSBoardOperation(b)) )
     }
 
     override def hashable(t: Board[T]) = t.toShortString
@@ -95,9 +97,8 @@ object Board extends LazyLogging {
     override val columns = c
     override val rows = r
 
-    def locationFromIndex(i: Int) = Location(i % columns, i / columns)
+    def locationFromIndex(i: Int) = Location(i % columns, i / columns) // ensuring ( i >= 0 && i < columns*rows )
 
-    // ensuring ( i >= 0 && i < columns*rows )
     def indexFromLocation(column: Int, row: Int): Int = (column + row * columns) // ensuring inside(Location(column,row)) ensuring (_ < pieces.length)
 
     def indexFromLocation(l: Location): Int = indexFromLocation(l.col, l.row)
