@@ -234,17 +234,21 @@ class SudokuPorBacktracking(base: Array[Array[Int]]){
     val filas = Array.tabulate(9)(f => Array.tabulate(9)(c => celdas(f)(c)))
     val columnas = Array.tabulate(9)(c => Array.tabulate(9)(f => celdas(f)(c)))
     val cuadros = Array.tabulate(9) { i =>
-        val fila = i / 3
-        val columna = i % 3
-        Array.tabulate(9)(j => celdas(fila * 3 + j/3)(columna * 3 + j%3))
-      }
-    filas ++ columnas ++ cuadros
+      val fila = i / 3
+      val columna = i % 3
+      Array.tabulate(9)(j => celdas(fila * 3 + j/3)(columna * 3 + j%3))
+    }
+
+    val todosLosGrupos = filas ++ columnas ++ cuadros
+    for( f <- 0 until 9 ; c <- 0 until 9 ){
+      val celda =celdas(f)(c)
+      celda.grupos = todosLosGrupos.filter( _.contains(celda) )
+    }
+
+    todosLosGrupos
+
   }
 
-  for( f <- 0 until 9 ; c <- 0 until 9 ){
-    val celda =celdas(f)(c)
-    celda.grupos = grupos.filter( _.contains(celda) )
-  }
 
   private def grupoValido(g: Grupo ) : Boolean = {
     val valores = g.map(_.valor)
@@ -257,34 +261,34 @@ class SudokuPorBacktracking(base: Array[Array[Int]]){
 
   def resuelto = valido && grupos.forall(_.forall(_.valor>0) )
 
-  def solve(i:Int = 0, maximo:Int=0) : (Boolean,Int) = {
-    if( i > maximo ) {
-      //println(s"\n\nCELDA $i")
-      //imprimeSolucion()
-    }
+  def solve(numeroCelda:Int = 0) : Boolean = {
+    val fila = numeroCelda / 9
+    val columna = numeroCelda % 9
 
-    var maximoLocal = maximo max i
-    val fila = i / 9
-    val columna = i % 9
-
-    if( i >= 9*9 ) {
-      (true, maximoLocal)
+    if( numeroCelda >= 9*9 ) {
+      // YA HE DADO VALOR A TODAS LAS CASILLAS
+      true
     }
     else if( celdas(fila)(columna).valor != 0 ){
-      solve(i + 1, maximoLocal)
+      // ESTA CASILLA YA TIENE VALOR (DEBE SER DEL ENUNCIADO DEL PROBLEMA)
+      solve(numeroCelda + 1)
     }
     else {
-
-      for( v <- 9 to 1 by -1 if(!resuelto) ){
-        valores(fila)(columna) = v
-        if( celdas(fila)(columna).valida ) {
-          val r = solve(i + 1, maximoLocal)
-          maximoLocal = r._2
+      // PRUEBO TODOS LOS VALORES
+      val celda = celdas(fila)(columna)
+      for( v <- 1 to 9 if(!resuelto) ){
+        celda() = v
+        if( celda.valida ) {
+          solve(numeroCelda + 1)
         }
       }
-      if( !resuelto )
-        valores(fila)(columna) = 0
-      (false,maximoLocal max i)
+
+      // SI NO HA FUNCIONADO NINGUNO, QUITO LOS VALORES PROBADOS
+      if( !resuelto ){
+        celda() = 0
+      }
+
+      resuelto
     }
   }
 
@@ -460,19 +464,16 @@ object Main extends App {
     }
   }
 
-  resuelveSudokuPorPasos(diabolical)
-  //pruebaOculta
-
-
-  private def pruebaOculta = {
-    val sudoku = new SudokuPorDeduccion()
-    sudoku.valoresIniciales(ejemploHiddenPairs)
-    sudoku.reduceDominioPorCeldasDefinidas
-    sudoku.imprimeDominios()
-    sudoku.reduceDominioPorCircunscripcionOculta(2, sudoku.filas(6))
-    println
-    sudoku.imprimeDominios()
+  private def resuelveSudokuPorBacktrack(datos: Array[Array[Int]]) = {
+    println("BACKTRACK")
+    val backtrack = new SudokuPorBacktracking(datos);
+    backtrack.imprimeSolucion()
+    backtrack.solve();
+    backtrack.imprimeSolucion()
   }
+
+  //resuelveSudokuPorPasos(hard)
+  resuelveSudokuPorBacktrack(hard)
 
 
 }

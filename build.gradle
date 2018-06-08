@@ -23,4 +23,5 @@ task wrapper(type: Wrapper) {
     gradleVersion = '3.2.1'
 }
 
-mainClassName = "dideco.Main"
+//mainClassName = "dideco.Main"
+mainClassName="sudoku.Main"
