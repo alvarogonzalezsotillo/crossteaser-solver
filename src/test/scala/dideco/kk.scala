@@ -13,7 +13,7 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class kk extends FlatSpec with LazyLogging {
 
-  val stepsForPerfectlyColorDefined_3x2 = 100000
+  val stepsForPerfectlyColorDefined_3x2 = 100
 
   val msLimit = 100000
 

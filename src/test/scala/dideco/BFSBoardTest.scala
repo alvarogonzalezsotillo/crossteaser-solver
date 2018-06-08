@@ -66,7 +66,7 @@ class BFSBoardTest extends FlatSpec {
 
 
     assert(found.isEmpty == opfound.isEmpty)
-    assert(bfs.allNodes.toSet.size == opbfs.allNodes.toSet.size)
+    assert(bfs.allNodes.size == opbfs.allNodes.size)
     assert(bfs.allNodes.map(_.node).toSet == opbfs.allNodes.map(_.node).toSet)
     assert(bfs.expandedNodes.toSet.size == opbfs.expandedNodes.toSet.size)
     assert(bfs.expandedNodes.map(_.node).toSet == opbfs.expandedNodes.map(_.node).toSet)

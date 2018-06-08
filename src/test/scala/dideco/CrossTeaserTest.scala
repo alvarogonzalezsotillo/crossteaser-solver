@@ -118,7 +118,7 @@ class CrossTeaserTest extends FlatSpec with LazyLogging {
     assert(foundNoH.isDefined)
     assert(foundH.isDefined)
     assert(foundNoH.get.pathToRoot.size >= foundH.get.pathToRoot.size)
-    assert(bfsNoH.currentInfo.numberOfExpandedNodes >= bfsH.currentInfo.numberOfExpandedNodes)
+    assert(bfsNoH.expandedNodes.size >= bfsH.expandedNodes.size)
 
   }
 

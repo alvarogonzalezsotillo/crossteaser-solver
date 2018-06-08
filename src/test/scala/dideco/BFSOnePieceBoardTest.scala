@@ -49,7 +49,6 @@ class BFSOnePieceBoardTest extends FlatSpec {
     cornerBfs.search()
     edgeBfs.search()
 
-    println( cornerBfs.allNodes.map(_.node.toString).sorted.zip(edgeBfs.allNodes.map(_.node.toString).sorted).mkString( "\n" ) )
 
     if( true ){
       val s1 = cornerBfs.allNodes.toSet

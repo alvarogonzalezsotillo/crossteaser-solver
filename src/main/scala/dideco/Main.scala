@@ -7,6 +7,8 @@ import dideco.OrientableColor.Color
 import dideco.OrientableColor.Color
 import dideco.OrientableColor.Color.Color
 
+import scala.util.Try
+
 /**
   * Created by alvaro on 28/12/14.
   */
@@ -51,7 +53,7 @@ object Main extends App {
 
   def waitForProfiler() = {
     println("Intro para seguir...")
-    new Scanner(System.in).nextLine()
+    Try(new Scanner(System.in).nextLine())
   }
 
   waitForProfiler()

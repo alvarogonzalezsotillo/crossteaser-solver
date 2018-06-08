@@ -36,14 +36,11 @@ trait BFS[T]{
 
 
   def search( msLimit: Int = -1 , nodesLimit: Int = -1 ) : Option[BFSNode[T]]
-  def expandedNodes : Seq[BFSNode[T]]
-  def nodesToExpand : Seq[BFSNode[T]]
-  def allNodes : Seq[BFSNode[T]]
+  def expandedNodes : Iterable[BFSNode[T]]
+  def nodesToExpand : Iterable[BFSNode[T]]
+  def allNodes  : Iterable[BFSNode[T]]
 
   object currentInfo{
-    def numberOfExpandedNodes = expandedNodes.size
-    def numberOfNodesToExpand = nodesToExpand.size
-
     override def toString = s"expandedNodes:${expandedNodes.size}  nodesToExpand:${nodesToExpand.size}"
   }
 
@@ -95,9 +92,10 @@ object BFS extends LazyLogging{
     _nodesToExpand += getOrCreateNode(0, null)(initial,null)
 
 
-    override def expandedNodes = _expandedNodes.toSeq
-    override def nodesToExpand = _nodesToExpand.toSeq
-    override def allNodes = _allNodes.values.toSeq
+    _nodesToExpand.size
+    override def expandedNodes = _expandedNodes
+    override def nodesToExpand = _nodesToExpand
+    override def allNodes = _allNodes.values
 
     class BFSNodeImpl(val node: T, val depth: Long, val parent: BFSNode[T], val operationFromParent: BFSOperation[T] ) extends BFSNode[T] {
 
@@ -130,8 +128,8 @@ object BFS extends LazyLogging{
 
         case Some(found) =>
           logger.debug( "getOrCreateNode:  hit:" + found  + " -- " + n )
+          //assert(found.depth<=depth)
           found
-
       }
 
       if (!_expandedNodes.contains(ret)) {
